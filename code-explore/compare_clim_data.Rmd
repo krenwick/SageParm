@@ -1,0 +1,455 @@
+---
+title: 'Station Data vs. Daymet: Climate and impact on model output'
+author: "Katie Renwick"
+date: "12/23/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=F, warning=F, include=F)
+```
+
+```{r}
+################################################################################
+# Compare Reynold's Creek weather data to Daymet
+# 1. Compare station data from site 176
+################################################################################
+rm(list=ls())
+library(tidyverse); theme_set(theme_bw(base_size=12)) # sized for print
+library(rgdal)
+library(raster)
+
+# paths to data and folder for figures
+dpath <- "/Users/poulterlab1/Documents/SageParm/data/"
+fpath <- "/Users/poulterlab1/Documents/SageParm/figures/"
+cpath <- "/Users/poulterlab1/Documents/LPJGUESS/Climate/Daymet/" # climate data
+
+# color scheme
+ggcolor <- c("#80cdc1","#018571", "#a6611a","#dfc27d")
+
+############ Get station data and put in propper format
+# Get station data for 2014- sent via email by Gerald Flerchinger, ARS
+RC176 <- read.csv(paste(dpath, "ReynoldsC/176.wea.30min.csv", sep=""))
+
+# coordinates of mt big sage site nearby:
+ll <- c(43.064483, -116.74862)
+
+# Convert 30-min temp and precip to monthly 
+head(RC176)
+str(RC176)
+RC2 <- RC176 %>% mutate(date=as.Date(datetimec)) %>%
+  group_by(date) %>% # group by day to calculate days with precip
+  summarise(dayppt=sum(ppta), daytemp=mean(tmp3), daysol=mean(sol)) %>%
+  mutate(yearmon=format(date, format="%y-%m")) %>%
+  group_by(yearmon) %>%
+  summarise(temp=mean(daytemp), ppt=sum(dayppt), meansol=mean(daysol),
+            wet=sum(dayppt>0))
+
+head(RC2)
+RC2$source <- "Station176"
+RC3 <- filter(RC2, yearmon<"15-01")
+
+# Pull in daymet data, extract values for points
+#Loop through the months and sample the climate data
+nmonths <- 12
+climate <- matrix(nrow=nmonths,ncol=6)
+
+for(m in 1:nmonths){
+  print(paste(round((m/nmonths)*100,2),"% finished"))
+  #Sample tmean
+  tmean.month.m <- raster(paste(cpath, "tmean_wusa.nc", sep=""), 
+                          band=(m+408), varname="tmean")    
+  climate[m,2] <- raster::extract(tmean.month.m, ll)[1]
+  ppt.month.m <- raster(paste(cpath, "prcp_wusa.nc", sep=""), 
+                          band=(m+408), varname="prcp")    
+  climate[m,3] <- raster::extract(ppt.month.m, ll)[1]
+  wet.month.m <- raster(paste(cpath, "wetd_wusa.nc", sep=""), 
+                          band=(m+408), varname="wetdays")    
+  climate[m,5] <- raster::extract(wet.month.m, ll)[1]
+  srad.month.m <- raster(paste(cpath, "srad24_wusa.nc", sep=""), 
+                          band=(m+408), varname="srad")    
+  climate[m,4] <- raster::extract(srad.month.m, ll)[1]
+} 
+
+climate2 <- data.frame(climate) # weird number issues with matrix
+names(climate2) <- c("yearmon","temp","ppt","meansol","wet","source")
+climate2$yearmon <- RC3$yearmon
+climate2$source <- "Daymet"
+
+# Do the same thing for Daymet3
+nmonths <- 24
+climateD3 <- matrix(nrow=nmonths,ncol=6)
+
+for(m in 1:nmonths){
+  print(paste(round((m/nmonths)*100,2),"% finished"))
+  #Sample tmean
+  tmean.month.m <- raster(paste(cpath, "tmean_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="tmean")    
+  climateD3[m,2] <- raster::extract(tmean.month.m, ll)[1]
+  ppt.month.m <- raster(paste(cpath, "prcp_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="prcp")    
+  climateD3[m,3] <- raster::extract(ppt.month.m, ll)[1]
+  wet.month.m <- raster(paste(cpath, "wetdays_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="wetdays")    
+  climateD3[m,5] <- raster::extract(wet.month.m, ll)[1]
+  srad.month.m <- raster(paste(cpath, "srad24_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="srad")    
+  climateD3[m,4] <- raster::extract(srad.month.m, ll)[1]
+} 
+
+climateD32 <- data.frame(climateD3) # weird number issues with matrix
+names(climateD32) <- c("yearmon","temp","ppt","meansol","wet","source")
+climateD32$yearmon <- RC2$yearmon
+climateD32$source <- "Daymet3"
+
+all <- rbind(RC2,climate2, climateD32)
+head(all)
+```
+
+## Comparison of climate drivers
+
+```{r, include=T}
+# Plot tmean
+ggplot(data=all, aes(x=yearmon,y=temp, group=source,color=source)) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab(expression("Temperature ("*~degree*"C)")) +
+  xlab("Date (year-month)")
+
+# Plot ppt
+ggplot(data=all, aes(x=yearmon,y=ppt, group=source,color=source)) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Precipitation (mm/month)") +
+  xlab("Date (year-month)")
+
+# Plot wetdays
+ggplot(data=all, aes(x=yearmon,y=wet, group=source,color=source)) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Wetdays (#/month)") +
+  xlab("Date (year-month)")
+
+# Plot srad
+ggplot(data=all, aes(x=yearmon,y=meansol, group=source,color=source)) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Solar Radiation (w/m2)") +
+  xlab("Date (year-month)")
+
+
+# Look at 2-year mean:
+all2 <- gather(all, Variable, value, temp:wet)
+
+ggplot(data=all2, aes(x=source, y=value, color=source)) +
+  geom_boxplot(notch=T) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  facet_wrap(~Variable, scale="free")
+```
+
+## Impact on model output
+### First: impact on variables compared to flux data
+
+```{r}
+library(zoo)
+detach("package:raster", unload=T) # so select works
+
+# Path to model output:
+dpath <- "/Users/poulterlab1/Documents/SageParm/testout/"
+
+# Read in flux data from the tower near mt sage site----------------------------
+df <- read.csv(paste(dpath, "../data/ReynoldsC/DailyFluxes2015.csv", sep="")) %>%
+  mutate(date=as.Date(day,origin=as.yearmon("2015-01-01"))) %>%
+  mutate(yearmon=format(date, format="%b %Y")) %>%
+  mutate(Source="Tower") %>%
+  mutate(yearmon=as.yearmon(yearmon)) %>%
+  group_by(yearmon, Source) 
+
+df_GPP <- df %>%
+  summarise(GPP=sum(GPPmbsec)*0.001) %>% # conver to kg
+  dplyr::select(yearmon, GPP, Source)
+
+# Note: sign seems reversed for NEE, hence mult. by negative .001  
+df_NEE <- df %>%
+  summarise(NEE=sum(NEEmbsec)*-0.001) %>% # conver to kg
+  dplyr::select(yearmon, NEE, Source) 
+
+df_ET <- df %>%
+  summarise(ET=sum(ETmbsec)) %>% # units are mm
+  dplyr::select(yearmon, ET, Source)
+
+df_R <- df %>%
+  summarise(Rsp=sum(Rspmbsec)*0.001) %>% # conver to kg
+  dplyr::select(yearmon, Rsp, Source) 
+
+# Read in all monthly model output data in a loop-------------------------------
+vars <- c("maet", "mevap", "mgpp","mintercep","mlai","mnee","mnpp","mpet",
+          "mra","mrh","mrunoff","mwcont_lower","mwcont_upper")
+modout <- NULL
+for(var in vars) {
+  s1 <- read.table(paste(dpath, "station_",var,".out", sep=""), header=T) %>%
+    gather(Month, value,Jan:Dec) %>%
+    mutate(Source="Station176", variable=var)
+  d1 <- read.table(paste(dpath, "daymet_",var,".out", sep=""), header=T) %>%
+    gather(Month, value,Jan:Dec) %>%
+    mutate(Source="Daymet", variable=var)
+  d31 <- read.table(paste(dpath, "daymet3_",var,".out", sep=""), header=T) %>%
+    gather(Month, value,Jan:Dec) %>%
+    mutate(Source="Daymet3", variable=var)
+  b <- rbind(s1,d1,d31)
+  modout <- rbind(modout,b)
+}
+
+modout2 <- modout %>%
+  mutate(m=match(Month, month.abb), Year=Year+860) %>%
+  mutate(yearmon=as.yearmon(paste(Year,m, sep="-"))) %>%
+  filter(yearmon>=2014)
+
+# Read in all annual PFT model output data in a loop-------------------------------
+vars <- c("anpp","cmass","dens","fpc","lai")
+aout <- NULL
+for(var in vars) {
+  s1 <- read.table(paste(dpath, "station_",var,".out", sep=""), header=T) %>%
+    mutate(Source="Station176", variable=var)
+  d1 <- read.table(paste(dpath, "daymet_",var,".out", sep=""), header=T) %>%
+    mutate(Source="Daymet", variable=var)
+  d31 <- read.table(paste(dpath, "daymet3_",var,".out", sep=""), header=T) %>%
+    mutate(Source="Daymet3", variable=var)
+  b <- rbind(s1,d1,d31)
+  aout <- rbind(aout,b)
+}
+aout2 <- mutate(aout, Year=Year+860)
+
+# Combine GPP with flux data
+GPP1 <- modout2 %>% filter(variable=="mgpp") %>%
+  select(yearmon, value, Source) %>%
+  rename(GPP=value)
+GPP <- rbind.data.frame(GPP1, df_GPP)
+# Combine NEE with flux data
+NEE1 <- modout2 %>% filter(variable=="mnee") %>%
+  select(yearmon, value, Source) %>%
+  rename(NEE=value)
+NEE <- rbind.data.frame(NEE1, df_NEE)
+# Combine respiration with flux data
+Rsp1 <- modout2 %>% filter(variable=="mra"|variable=="mrh") %>%
+  group_by(yearmon,Source) %>%
+  summarise(Rsp=sum(value)) %>%
+  select(yearmon, Rsp, Source) 
+Rsp <- rbind.data.frame(Rsp1, df_R)
+# Combine ET with flux data
+ET1 <- modout2 %>% filter(variable=="maet") %>%
+  select(yearmon, value, Source) %>%
+  rename(ET=value)
+ET <- rbind.data.frame(ET1, df_ET)
+
+
+#############################################
+# Check: NEE should equal GPP + R:
+df2 <- df %>% mutate(NEE2=-GPPmbsec+Rspmbsec) %>%
+  select(ETmbsec,GPPmbsec,Rspmbsec,NEEmbsec,NEE2,yearmon)
+head(df2) # Perfect!
+
+# Check guess output: NEE should equal GPP + ra + rh
+head(modout2)
+mo3 <- modout2 %>% spread(variable,value) %>%
+  mutate(NEE2=mgpp-mra-mrh) %>%
+  select(maet:mgpp,mra:mrh,mnee,NEE2)
+head(mo3) # OK, minus some rounding errors
+```
+
+```{r, include=T}
+ggplot(data=GPP, aes(x=yearmon, y=GPP, color=Source)) +
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly GPP") +
+  xlab("Date")
+
+# Plot NEE
+ggplot(data=NEE, aes(x=yearmon, y=NEE, color=Source)) +
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly NEE") +
+  xlab("Date")
+
+# Plot respiration
+ggplot(data=Rsp, aes(x=yearmon, y=Rsp, color=Source)) +
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly Respiration") +
+  xlab("Date")
+```
+
+Note: I'm not sure which model output corresponds to ET from the flux data: maet, mevap, mpet, or perhaps maet + mevap? Shown here is maet.
+
+```{r, include=T}
+# Plot ET
+ggplot(data=ET, aes(x=yearmon, y=ET, color=Source)) +
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly Evapotranspiration") +
+  xlab("Date")
+```
+
+### Second: Plot additional monthly variables
+
+```{r, include=T}
+mo3 <- modout %>%
+  mutate(m=match(Month, month.abb), Year=Year+860) %>%
+  mutate(yearmon=as.yearmon(paste(Year,m, sep="-"))) %>%
+  filter(yearmon>=2014) 
+
+ggplot(data=filter(mo3, variable=="mnpp"), 
+       aes(x=yearmon, y=value, color=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly NPP") +
+  xlab("Date")
+
+ggplot(data=filter(mo3, variable=="mlai"), 
+       aes(x=yearmon, y=value, color=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly LAI") +
+  xlab("Date")
+
+ggplot(data=filter(mo3, variable=="mwcont_upper"), 
+       aes(x=yearmon, y=value, color=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Soil Water Content (upper layer)") +
+  xlab("Date")
+
+ggplot(data=filter(mo3, variable=="mwcont_lower"), 
+       aes(x=yearmon, y=value, color=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Soil Water Content (lower layer)") +
+  xlab("Date")
+```
+
+### Third: plot annual variables by PFT
+Note that there is only one year of overlap in the driver data: 2014. I've highlighted this year with a dashed line.
+
+```{r, include=T}
+ao3 <- filter(aout2, Year>2000) %>%
+  gather(PFT, Value, PJ:C4)
+ggplot(data=filter(ao3, variable=="fpc"), 
+       aes(x=Year, y=Value, color=PFT, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual FPC") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="anpp"), 
+       aes(x=Year, y=Value, color=PFT, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual NPP") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="cmass"), 
+       aes(x=Year, y=Value, color=PFT, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual Biomass") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="dens"), 
+       aes(x=Year, y=Value, color=PFT, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual Density") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+```
+
+### Fourth: plot annual variables, looking just at total
+
+```{r, include=T}
+ggplot(data=filter(ao3, variable=="fpc"), 
+       aes(x=Year, y=Total, color=Source, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual FPC (Total)") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="anpp"), 
+       aes(x=Year, y=Total, color=Source, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual NPP") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="cmass"), 
+       aes(x=Year, y=Total, color=Source, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual Biomass") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+ggplot(data=filter(ao3, variable=="dens"), 
+       aes(x=Year, y=Total, color=Source, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual Density") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+```
+
+### Just for fun: NPP over modern times.
+This shows what a big effect CO2 has throughout the past century. It's much more obvious with the station data because there is less variation in climate, so the trend in increasing NPP is driven entirely by increasing atmospheric CO2.
+
+```{r, include=T}
+# NPP over all of time
+ggplot(data=filter(aout2, variable=="anpp", Year>1800), 
+       aes(x=Year, y=ARTR, color=Source, shape=Source)) +
+  geom_line() + geom_point() +
+  scale_color_manual(values=ggcolor) +
+  ylab("Annual NPP") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+```
+
+## Run parameters, which were the same (except end year) for both simulations:
+- param "annual_output" (num 1)
+- title "LPJ-GUESS (guess2008) cohort mode"
+- vegmode "cohort"
+- nyear 1156 !1155 to run to 2014
+- ifdailynpp 1
+- ifdailydecomp 1 !KE 8.19.14 changed to daily 1 from monthly 0
+- ifcalcsla 0
+- iffire 1 !fire on 0 fire off 1
+- npatch 100 
+- patcharea 1000
+- estinterval 5 
+- ifdisturb 1
+- distinterval 100
+- ifbgestab 1
+- ifsme 1
+- ifstochestab 1
+- ifstochmort 1
+- ifcdebt 1
+- ifmanaged 0     
+- ifsmoothgreffmort 1
+- ifdroughtlimitedestab 1 !KE turned off (0)
+- ifrainonwetdaysonly 1
+- ifspeciesspecificwateruptake 1
+- instype "SWRAD"
+- soildata "textfile" 
+- climdat "DAYMET" 
+- startHis 1120 !1120
+- outtype "TEXT"

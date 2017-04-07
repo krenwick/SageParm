@@ -1,0 +1,434 @@
+---
+title: "Reynold’s Creek Flux Comparison"
+author: "Katie Renwick"
+date: "1/11/2017"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=F, warning=F, include=F)
+```
+
+```{r}
+################################################################################
+# Compare Reynold's Creek weather data to Daymet
+# 1. Compare station data from site 176
+################################################################################
+rm(list=ls())
+library(tidyverse); theme_set(theme_bw(base_size=20)) # sized for ppt
+library(rgdal)
+library(raster)
+
+# paths to data and folder for figures
+dpath <- "/Users/poulterlab1/Documents/SageParm/data/"
+fpath <- "/Users/poulterlab1/Documents/SageParm/figures/"
+cpath <- "/Users/poulterlab1/Documents/LPJGUESS/Climate/Daymet/" # climate data
+
+# color scheme
+ggcolor <- c("#80cdc1","#018571", "#a6611a","#dfc27d")
+
+############ Get station data and put in propper format
+# Get station data for 2014- sent via email by Gerald Flerchinger, ARS
+RC176 <- read.csv(paste(dpath, "ReynoldsC/176.wea.30min.2015.csv", sep=""))
+
+# coordinates of mt big sage site nearby:
+ll <- c(43.064483, -116.74862)
+
+# Convert 30-min temp and precip to monthly 
+head(RC176)
+str(RC176)
+RC2 <- RC176 %>% mutate(date=as.Date(datetimec)) %>%
+  group_by(date) %>% # group by day to calculate days with precip
+  summarise(dayppt=sum(ppta), daytemp=mean(tmp3), daysol=mean(sol)) %>%
+  mutate(yearmon=format(date, format="%y-%m")) %>%
+  group_by(yearmon) %>%
+  summarise(temp=mean(daytemp), ppt=sum(dayppt), meansol=mean(daysol),
+            wet=sum(dayppt>0))
+
+head(RC2)
+RC2$source <- "Station176"
+RC3 <- filter(RC2, yearmon<"15-01")
+
+# Pull in daymet3 data, extract values for points
+#Loop through the months and sample the climate data
+nmonths <- 24
+climateD3 <- matrix(nrow=nmonths,ncol=6)
+
+for(m in 1:nmonths){
+  print(paste(round((m/nmonths)*100,2),"% finished"))
+  #Sample tmean
+  tmean.month.m <- raster(paste(cpath, "tmean_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="tmean")    
+  climateD3[m,2] <- raster::extract(tmean.month.m, ll)[1]
+  ppt.month.m <- raster(paste(cpath, "prcp_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="prcp")    
+  climateD3[m,3] <- raster::extract(ppt.month.m, ll)[1]
+  wet.month.m <- raster(paste(cpath, "wetdays_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="wetdays")    
+  climateD3[m,5] <- raster::extract(wet.month.m, ll)[1]
+  srad.month.m <- raster(paste(cpath, "srad24_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="srad")    
+  climateD3[m,4] <- raster::extract(srad.month.m, ll)[1]
+} 
+
+climateD32 <- data.frame(climateD3) # weird number issues with matrix
+names(climateD32) <- c("yearmon","temp","ppt","meansol","wet","source")
+climateD32$yearmon <- RC2$yearmon
+climateD32$source <- "Daymet3"
+
+all <- rbind(RC2, climateD32)
+head(all)
+```
+
+# Station data compared to Daymet
+## Temperature
+
+```{r, include=T}
+# Plot tmean
+ggplot(data=all, aes(x=yearmon,y=temp, group=source,color=source)) +
+  geom_point(size=1) +
+  geom_line(size=1) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab(expression("Temperature ("*~degree*"C)")) +
+  xlab("Date (year-month)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Station data compared to Daymet
+## Precipitation
+
+```{r, include=T}
+# Plot ppt
+ggplot(data=all, aes(x=yearmon,y=ppt, group=source,color=source)) +
+  geom_point(size=1) +
+  geom_line(size=1) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Precipitation (mm/month)") +
+  xlab("Date (year-month)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Station data compared to Daymet
+## Wet Days
+
+```{r, include=T}
+# Plot wetdays
+ggplot(data=all, aes(x=yearmon,y=wet, group=source,color=source)) +
+  geom_point(size=1) +
+  geom_line(size=1) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Wetdays (#/month)") +
+  xlab("Date (year-month)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Station data compared to Daymet
+## Solar Radiation
+
+```{r, include=T}
+
+# Plot srad
+ggplot(data=all, aes(x=yearmon,y=meansol, group=source,color=source)) +
+  geom_point(size=1) +
+  geom_line(size=1) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  ylab("Solar Radiation (w/m2)") +
+  xlab("Date (year-month)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Mean over 2 years for each variable
+
+```{r, include=T}
+# Look at 2-year mean:
+all2 <- gather(all, Variable, value, temp:wet)
+
+ggplot(data=all2, aes(x=source, y=value, color=source)) +
+  geom_boxplot(notch=T, size=1) +
+  scale_color_manual(values=ggcolor, name="Data Source") +
+  facet_wrap(~Variable, scale="free")
+```
+
+```{r}
+library(zoo)
+detach("package:raster", unload=T) # so select works
+
+# Path to model output:
+dpath <- "/Users/poulterlab1/Documents/SageParm/testout/"
+
+# Read in flux data from the tower near mt sage site----------------------------
+df <- read.csv(paste(dpath, "../data/ReynoldsC/DailyFluxes2015.csv", sep="")) %>%
+  mutate(date=as.Date(day,origin=as.yearmon("2015-01-01"))) %>%
+  mutate(yearmon=format(date, format="%b %Y")) %>%
+  mutate(Source="Tower") %>%
+  mutate(yearmon=as.yearmon(yearmon)) %>%
+  group_by(yearmon, Source) 
+
+df_GPP <- df %>%
+  summarise(GPP=sum(GPPmbsec)*0.001) %>% # conver to kg
+  dplyr::select(yearmon, GPP, Source)
+
+# Note: sign seems reversed for NEE, hence mult. by negative .001  
+df_NEE <- df %>%
+  summarise(NEE=sum(NEEmbsec)*-0.001) %>% # conver to kg
+  dplyr::select(yearmon, NEE, Source) 
+
+df_ET <- df %>%
+  summarise(ET=sum(ETmbsec)) %>% # units are mm
+  dplyr::select(yearmon, ET, Source)
+
+df_R <- df %>%
+  summarise(Rsp=sum(Rspmbsec)*0.001) %>% # conver to kg
+  dplyr::select(yearmon, Rsp, Source) 
+
+# Read in MODIS data for the site, filter for this site-------------------------
+#modis <- read.csv(paste(dpath, "../data/ReynoldsC/MODIS/lai_npp_gpp.csv", sep="")) %>%
+  #filter(Latitude==43.064483) %>%
+  #mutate(yearmon=format(Date, format="%b %Y")) %>%
+  #mutate(Source="MODIS") %>%
+  ##mutate(yearmon=as.yearmon(yearmon)) %>%
+  #filter(year>=2014) 
+
+# Read in all monthly model output data in a loop-------------------------------
+vars <- c("maet", "mevap", "mgpp","mintercep","mlai","mnee","mnpp","mpet",
+          "mra","mrh","mrunoff","mwcont_lower","mwcont_upper")
+modout <- NULL
+for(var in vars) {
+  s1 <- read.table(paste(dpath, "station_",var,".out", sep=""), header=T) %>%
+    gather(Month, value,Jan:Dec) %>%
+    mutate(Source="Station176", variable=var)
+  d31 <- read.table(paste(dpath, "daymet3_",var,".out", sep=""), header=T) %>%
+    gather(Month, value,Jan:Dec) %>%
+    mutate(Source="Daymet3", variable=var)
+  b <- rbind(s1,d31)
+  modout <- rbind(modout,b)
+}
+
+modout2 <- modout %>%
+  mutate(m=match(Month, month.abb), Year=Year+860) %>%
+  mutate(yearmon=as.yearmon(paste(Year,m, sep="-"))) %>%
+  filter(yearmon>=2014)
+
+# Read in all annual PFT model output data in a loop-------------------------------
+vars <- c("anpp","cmass","dens","fpc","lai")
+aout <- NULL
+for(var in vars) {
+  s1 <- read.table(paste(dpath, "station_",var,".out", sep=""), header=T) %>%
+    mutate(Source="Station176", variable=var)
+  #d1 <- read.table(paste(dpath, "daymet_",var,".out", sep=""), header=T) %>%
+    #mutate(Source="Daymet", variable=var)
+  d31 <- read.table(paste(dpath, "daymet3_",var,".out", sep=""), header=T) %>%
+    mutate(Source="Daymet3", variable=var)
+  b <- rbind(s1,d31)
+  aout <- rbind(aout,b)
+}
+aout2 <- mutate(aout, Year=Year+860)
+
+# Combine GPP with flux data
+GPP1 <- modout2 %>% filter(variable=="mgpp") %>%
+  select(yearmon, value, Source) %>%
+  rename(GPP=value)
+#mgpp <- modis %>% select(yearmon, GPP,Source)
+GPP <- rbind.data.frame(GPP1, df_GPP) %>%
+  mutate(Date=as.Date(yearmon))
+# Combine NEE with flux data
+NEE1 <- modout2 %>% filter(variable=="mnee") %>%
+  select(yearmon, value, Source) %>%
+  rename(NEE=value)
+NEE <- rbind.data.frame(NEE1, df_NEE) %>%
+  mutate(Date=as.Date(yearmon))
+# Combine respiration with flux data
+Rsp1 <- modout2 %>% filter(variable=="mra"|variable=="mrh") %>%
+  group_by(yearmon,Source) %>%
+  summarise(Rsp=sum(value)) %>%
+  select(yearmon, Rsp, Source) 
+Rsp <- rbind.data.frame(Rsp1, df_R)
+Rsp$Date <- as.Date(Rsp$yearmon)
+# Combine ET with flux data
+ET1 <- modout2 %>% filter(variable=="maet") %>%
+  select(yearmon, value, Source) %>%
+  rename(ET=value)
+ET <- rbind.data.frame(ET1, df_ET) %>%
+  mutate(Date=as.Date(yearmon))
+
+
+#############################################
+# Check: NEE should equal GPP + R:
+df2 <- df %>% mutate(NEE2=-GPPmbsec+Rspmbsec) %>%
+  select(ETmbsec,GPPmbsec,Rspmbsec,NEEmbsec,NEE2,yearmon)
+head(df2) # Perfect!
+
+# Check guess output: NEE should equal GPP + ra + rh
+head(modout2)
+mo3 <- modout2 %>% spread(variable,value) %>%
+  mutate(NEE2=mgpp-mra-mrh) %>%
+  select(maet:mgpp,mra:mrh,mnee,NEE2)
+head(mo3) # OK, minus some rounding errors
+```
+
+# Impact of climate drivers on model output
+## GPP
+
+```{r, include=T}
+ggplot(data=GPP, aes(x=Date, y=GPP, color=Source)) +
+  geom_line(size=1) +
+  geom_point(size=1.5) +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly GPP") +
+  xlab("Date")
+```
+
+# Impact of climate drivers on model output
+## NEE
+
+```{r, include=T}
+# Plot NEE
+ggplot(data=NEE, aes(x=Date, y=NEE, color=Source)) +
+  geom_line(size=1) +
+  geom_point(size=1.5) +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly NEE") +
+  xlab("Date")
+```
+
+# Impact of climate drivers on model output
+## Respiration
+
+```{r, include=T}
+# Plot respiration
+ggplot(data=Rsp, aes(x=Date, y=Rsp, color=Source)) +
+  geom_line(size=1) +
+  geom_point(size=1.5) +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly Respiration") +
+  xlab("Date")
+```
+
+# Impact of climate drivers on model output
+## NPP
+
+```{r, include=T}
+mo3 <- modout %>%
+  mutate(m=match(Month, month.abb), Year=Year+860) %>%
+  mutate(yearmon=as.yearmon(paste(Year,m, sep="-"))) %>%
+  filter(yearmon>=2014) %>%
+  mutate(Date=as.Date(yearmon))
+
+ggplot(data=filter(mo3, variable=="mnpp"), 
+       aes(x=Date, y=value, color=Source)) +
+  geom_line(size=1) + geom_point(size=1.5) +
+  scale_color_manual(values=ggcolor) +
+  ylab("Monthly NPP") +
+  xlab("Date")
+```
+
+```{r, include=T}
+# ggplot(data=filter(mo3, variable=="mlai"),
+#        aes(x=yearmon, y=value, color=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Monthly LAI") +
+#   xlab("Date")
+
+# ggplot(data=filter(mo3, variable=="mwcont_upper"), 
+#        aes(x=yearmon, y=value, color=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Soil Water Content (upper layer)") +
+#   xlab("Date")
+# 
+# ggplot(data=filter(mo3, variable=="mwcont_lower"), 
+#        aes(x=yearmon, y=value, color=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Soil Water Content (lower layer)") +
+#   xlab("Date")
+```
+
+# Annual variables by Plant Functional Type (PFT)
+## Foliar Projective Cover
+
+```{r, include=T}
+ao3 <- filter(aout2, Year>2007) %>%
+  gather(PFT, Value, ARTR:C4)
+ggplot(data=filter(ao3, variable=="fpc"), 
+       aes(x=Year, y=Value, color=PFT, linetype=Source)) +
+  geom_line(size=1) + geom_point(size=2) +
+  #scale_color_manual(values=ggcolor) +
+  ylab("Annual FPC") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+```
+
+# Net Primary Productivity
+
+```{r, include=T}
+ggplot(data=filter(ao3, variable=="anpp"), 
+       aes(x=Year, y=Value, color=PFT, linetype=Source)) +
+  geom_line(size=1) + geom_point(size=2) +
+  #scale_color_manual(values=ggcolor) +
+  ylab("Annual NPP") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+```
+
+# Biomass
+
+```{r, include=T}
+ggplot(data=filter(ao3, variable=="cmass"), 
+       aes(x=Year, y=Value, color=PFT, linetype=Source)) +
+  geom_line(size=1) + geom_point(size=2) +
+  #scale_color_manual(values=ggcolor) +
+  ylab("Annual Biomass") +
+  xlab("Year") +
+  geom_vline(xintercept=2014, linetype="dashed")
+
+# ggplot(data=filter(ao3, variable=="dens"), 
+#        aes(x=Year, y=Value, color=PFT, shape=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Annual Density") +
+#   xlab("Year") +
+#   geom_vline(xintercept=2014, linetype="dashed")
+```
+
+
+```{r, include=T}
+# ggplot(data=filter(ao3, variable=="fpc"), 
+#        aes(x=Year, y=Total, color=Source, shape=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Annual FPC (Total)") +
+#   xlab("Year") +
+#   geom_vline(xintercept=2014, linetype="dashed")
+
+# ggplot(data=filter(ao3, variable=="lai"), 
+#        aes(x=Year, y=Total, color=Source)) +
+#   geom_line(size=1) + geom_point(size=2) +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("LAI") +
+#   xlab("Year") +
+#   geom_vline(xintercept=2014, linetype="dashed")
+
+# ggplot(data=filter(ao3, variable=="cmass"), 
+#        aes(x=Year, y=Total, color=Source, shape=Source)) +
+#   geom_line(size=1) + geom_point(size=1.5) +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Annual Biomass") +
+#   xlab("Year") +
+#   geom_vline(xintercept=2014, linetype="dashed")
+
+# ggplot(data=filter(ao3, variable=="dens"), 
+#        aes(x=Year, y=Total, color=Source, shape=Source)) +
+#   geom_line() + geom_point() +
+#   scale_color_manual(values=ggcolor) +
+#   ylab("Annual Density") +
+#   xlab("Year") +
+#   geom_vline(xintercept=2014, linetype="dashed")
+```
+
+# Next Steps
+1. Plant community data- is the problem relative % of sage?
+2. Additional sites/years for comparison. Can LPJ-GUESS replicate spatial and temporal trends in vegetation response to climate?
+3. Parameter optimization: match flux data to determine new estimates for parameters with limited data (ex. root turnover rate).
+4. Learn something about the ecology/physiology and climate sensitivity of sagebrush!
