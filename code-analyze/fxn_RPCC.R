@@ -23,8 +23,8 @@ RPCC <- function(data,site){
 
   # For annual (sagebrush) data:
   if(ncol(b)<=9){
-    b=b[,1:8] # deal with 9th column in FPC due to fucked up merge
-    names(b)[8] <- "file"
+    b=b[,1:7] # deal with 9th column in FPC due to fucked up merge
+    names(b)[7] <- "file"
   }
 
     # select appropriate years (1986-2015)
@@ -35,12 +35,13 @@ RPCC <- function(data,site){
       dplyr::select(-cut) %>%
       separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                             "root_up","turnover_sap","pstemp_min",
-                            "pstemp_lo","est_max","pstemp_max", "pstemp_hi"),
+                            "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
+                            "k_chillb","phengdd5","leaflong"),
                sep = "_",extra="drop") %>%
-      separate(pstemp_hi, into=c("pstemp_hi","del"), sep=-5) %>%
+      separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
       dplyr::select(-del) %>%
       mutate(row=seq(1:nrow(.))) %>%
-      gather(parameter,value, sla:pstemp_hi) %>%
+      gather(parameter,value, sla:leaflong) %>%
       separate(value, into=c("name","value"), sep=5, extra="drop") %>%
       dplyr::select(-name) %>%
       mutate(value=as.numeric(value)) %>%
@@ -49,8 +50,8 @@ RPCC <- function(data,site){
         group_by(Year, parameter,value, row, id) %>%
         summarise(N_annual=sum(N))
           } else .} %>%
-      {if(ncol(b)==8) {
-        dplyr::select(., -C3, -C4, -Total) %>%
+      {if(ncol(b)==7) {
+        dplyr::select(., -C3, -Total) %>%
         rename(N_annual=ARTR)
       } else .} %>%
       group_by(parameter,value,id) %>%
@@ -60,7 +61,7 @@ RPCC <- function(data,site){
       dplyr::select(mean:turnover_sap)
 
   # Calculate PRCC
-  R <- pcc(X=b1[,2:13], y=b1[,1], rank=T)
+  R <- pcc(X=b1[,2:16], y=b1[,1], rank=T)
   R$PRCC
 }
 
@@ -76,12 +77,13 @@ RPCCseas <- function(data){
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                           "root_up","turnover_sap","pstemp_min",
-                          "pstemp_lo","est_max","pstemp_max", "pstemp_hi"),
+                          "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
+                          "k_chillb","phengdd5","leaflong"),
              sep = "_",extra="drop") %>%
-    separate(pstemp_hi, into=c("pstemp_hi","del"), sep=-5) %>%
+    separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:pstemp_hi) %>%
+    gather(parameter,value, sla:leaflong) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -90,9 +92,38 @@ RPCCseas <- function(data){
     mutate(N_annual=sum(N)) %>%
     spread(Month,N) %>%
     mutate(spring=(Mar+Apr+May)/N_annual, summer=(Jun+Jul+Aug)/N_annual, 
-           fall=(Sep+Oct)/N_annual) %>%
+           fall=(Sep+Oct+Nov)/N_annual) %>%
     group_by(parameter,value,id,Lon) %>%
     summarise(spring=mean(spring), summer=mean(summer), fall=mean(fall)) %>%
+    spread(parameter,value) %>%
+    ungroup() 
+  b1
+}
+
+RPCCmonth <- function(data){
+  b <- fread(data,header=T)
+  names(b)[16] <- "file"
+  
+  # select appropriate years (1986-2015)
+  b1 <- b %>% mutate(Year=Year+860) %>% 
+    filter(Year>=1986) %>%
+    mutate(id1=file) %>%
+    separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
+    dplyr::select(-cut) %>%
+    separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
+                          "root_up","turnover_sap","pstemp_min",
+                          "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
+                          "k_chillb","phengdd5","leaflong"),
+             sep = "_",extra="drop") %>%
+    separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
+    dplyr::select(-del) %>%
+    mutate(row=seq(1:nrow(.))) %>%
+    gather(parameter,value, sla:leaflong) %>%
+    separate(value, into=c("name","value"), sep=5, extra="drop") %>%
+    dplyr::select(-name) %>%
+    mutate(value=as.numeric(value)) %>%
+    group_by(parameter,value,id,Lon) %>%
+    summarise_each(funs(mean)) %>%
     spread(parameter,value) %>%
     ungroup() 
   b1

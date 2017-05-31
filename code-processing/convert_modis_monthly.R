@@ -7,7 +7,7 @@ library(imputeTS)
 
 setwd("~/Documents/SageParm/")
 
-# Pull in MODIS 1 (LAI)
+# Pull in MODIS 1 (LAI). LAI is unitless.
 m1 <- read.csv("data/ReynoldsC/MODIS/mbsage-MCD15A2-005-results.csv") %>%
   select(Date, Latitude,MCD15A2_005_Lai_1km) %>%
   mutate(Date=as.Date(as.character(Date))) %>%
@@ -57,7 +57,7 @@ npp4 <- npp3 %>%
   summarise_each(funs(mean)) %>%
   gather(Latitude, NPP,`43.064483`:`43.167545`)
 
-# Third variable: GPP---------------------------------------------------------
+# Third variable: GPP, kg C m-2 (no need to convert)----------------------------
 g1 <- read.csv("data/ReynoldsC/MODIS/sage2-MOD17A2H-006-results.csv") %>%
   select(Date, Latitude,MOD17A2H_006_Gpp_500m) %>%
   mutate(Date=as.Date(as.character(Date))) %>%
@@ -85,3 +85,6 @@ a2 <- merge(a1, npp4, by=c("month","year","Latitude"), all=T)
 
 # Export to data folder
 write.csv(a1, "./data/ReynoldsC/MODIS/lai_gpp.csv", row.names=F)
+
+# What is the long-term monthly mean across sites?
+a2 %>% group_by(month) %>% summarise_each(funs(mean))

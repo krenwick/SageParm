@@ -72,13 +72,43 @@ bb3 <- b %>%
   select(Year, Month, Site, Model, Tower) %>%
   rename(AllMod=Model)
 
+# Pull in data from initial ("standard parameters") model runs
+dpath <- "/Users/poulterlab1/Documents/SageParm/RCout/"
+s1 <- read.table(paste(dpath, "daymet3_mgpp.out", sep=""), header=T) %>%
+  gather(Month, value,Jan:Dec) %>%
+  mutate(m=match(Month, month.abb), Year=Year+860) %>%
+  mutate(yearmon=as.yearmon(paste(Year,m, sep="-"))) %>%
+  filter(yearmon>=2014) %>%
+  rename(Standard=value) %>%
+  mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  select(Year, Month, Site, Standard)
+
 all <- merge(bb2,bb3, by=c("Year","Month","Site","Tower")) %>%
-  gather(Source, GPP, Tower:AllMod)
+  merge(.,s1, by=c("Year","Month","Site")) %>%
+  gather(Source, GPP, Tower:Standard)
 all$Date <- as.yearmon(paste(all$Year, all$Month), "%Y %b")
 all$D2 <- as.Date(all$Date)
 
 # Make a plot!
-ggplot(data=all, aes(x=D2, y=GPP, color=Source)) +
+flux <- ggplot(data=all, aes(x=D2, y=GPP, color=Source, linetype=Source)) +
   geom_point() +
   geom_line() +
-  facet_wrap(~Site)
+  scale_linetype_manual(name="Source",
+                        breaks=c("Tower","Standard","AllMod","Model"),
+                        labels=c("Tower","Standard Parameters", "Best Overall","Best for Site"),
+                        values=c("dashed", "dashed","dashed","solid"))+
+  scale_color_manual(name="Source",
+                     breaks=c("Tower","Standard","AllMod","Model"),
+                    labels=c("Tower","Standard Parameters", "Best Overall","Best for Site"),
+                    values=c("darkcyan","deepskyblue","brown3","black")) +
+  facet_wrap(~Site) +
+  xlab("Date") +
+  ylab(expression(GPP~(kg~m^{-2}))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggsave("figures/flux_mod_comparison.pdf", plot=flux,
+       width = 169, height = 140, units = 'mm')
+################################################################

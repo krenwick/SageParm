@@ -16,7 +16,7 @@ df3 <- read.csv("data/RCflux_15_16.csv")
 mod <- NULL 
 vars=c("mgpp","mrh","mra","mnee","mevap","maet")
 for(var in vars) {
-  data=paste("automate_tests/merged/",var,".txt", sep="")
+  data=paste("ModOut/LHC/",var,".txt", sep="")
   b <- fread(data, header=T)
   names(b)[16] <- "file"
   # select appropriate years (2014-2015)
@@ -59,9 +59,10 @@ bb2 <- b %>%
   dplyr::select(-cut) %>%
   separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                         "root_up","turnover_sap","pstemp_min",
-                        "pstemp_lo","est_max","pstemp_max", "pstemp_hi"),
+                        "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
+                        "k_chillb","phengdd5","leaflong"),
            sep = "_",extra="drop") %>%
-  separate(pstemp_hi, into=c("pstemp_hi","del"), sep=-5) %>%
+  separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
   dplyr::select(-del) %>%
   gather(parameter,value, sla:pstemp_hi) %>%
   separate(value, into=c("name","value"), sep=5, extra="drop") %>%
@@ -97,9 +98,10 @@ bb3 <- b %>%
   dplyr::select(-cut) %>%
   separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                         "root_up","turnover_sap","pstemp_min",
-                        "pstemp_lo","est_max","pstemp_max", "pstemp_hi"),
+                        "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
+                        "k_chillb","phengdd5","leaflong"),
            sep = "_",extra="drop") %>%
-  separate(pstemp_hi, into=c("pstemp_hi","del"), sep=-5) %>%
+  separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
   dplyr::select(-del) %>%
   gather(parameter,value, sla:pstemp_hi) %>%
   separate(value, into=c("name","value"), sep=5, extra="drop") %>%
@@ -170,7 +172,7 @@ gg1 <- ggplot(data=b4, aes(x=Site,y=mean)) +
   ylab("Parameter Value") +
   theme(strip.background = element_rect(colour="black", fill="white"))
 
-ggsave("figures/LHC_parm_estimates.pdf", plot=gg1,
+ggsave("figures/LHC_parm_estimates1.pdf", plot=gg1,
        width = 169, height = 150, units = 'mm')
 ################################################################################
 # Try plotting 16 actual points instead of the range (Show distribution)
@@ -219,7 +221,8 @@ gg2 <- ggplot() +
 # Distributions are skewed- mean is not informative
 # Violin is more helpful than box plot
 
-ggsave("figures/LHC_parm_estimates2.pdf", plot=gg2,
+ggsave("figures/LHC_parm_estimates.pdf", plot=gg2,
        width = 169, height = 150, units = 'mm')
 
 ########################################
+
