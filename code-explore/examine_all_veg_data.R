@@ -32,17 +32,26 @@ lai2 <- select(lai, -greenhits) %>%
   summarise_each(funs(mean,sd,min,max)) 
 lai2
 
+# what percent sagebrush at each site?
+lai2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
+# wbs: .69%, .24 absolute
+# los: .69%, .30 absolute
+# mbs: .55%, .67 absolute
+
 # Re-format the cover data:
 head(cover)
 cover2 <- select(cover, -firsthits) %>%
   spread(growthform,canopycover) %>%
   mutate(C3=forb+grass) %>%
   select(-forb,-grass,-Frame) %>%
-  group_by(Site,replicate) %>%
-  #select(-replicate) %>%
+  group_by(Site) %>%
+  select(-replicate) %>%
   summarise_each(funs(mean,sd,min,max)) 
 cover2
-cover2 %>% group_by(Site) %>% summarise_each(funs(mean))
+cover2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
+# wbs: .31
+# los: .45
+# mbs: .62
 
 # Basal cover data doesn't actually seem that useful.
 
