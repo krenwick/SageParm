@@ -3,8 +3,8 @@
 ################################################################################
 rm(list=ls())
 library(DEoptim)
-library(data.table)
-library(tidyverse)
+library(dtplyr)
+library(tidyr)
 
 # SET WORKING DIRECTORY:
 setwd("./")
@@ -38,7 +38,7 @@ df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
 # Depends on tidyr and data.table packages
 
 # First, read ins into memory:
-ins  <- readLines("summergreen_optim1_LM.ins") # only outputs GPP
+ins  <- readLines("optim2_newphen.ins") # only outputs GPP and LAI
 
 # NOTE: to run in paralle might need to wrap in foreach
 # Otherwise would over-write the temp ins file (I think)
@@ -49,25 +49,20 @@ LPJG <- function(par) {
   tx  <- gsub(pattern = "ltor_maxval", replace = par[3], x = tx)
   tx  <- gsub(pattern = "rootdistval", replace = par[4], x = tx)
   tx  <- gsub(pattern = "rootdist2", replace = (1-par[4]), x = tx)
-  tx  <- gsub(pattern = "pstemp_minval", replace = par[5], x = tx)
+  tx  <- gsub(pattern = "phen_winterval", replace = par[5], x = tx)
   tx  <- gsub(pattern = "pstemp_lowval", replace = par[6], x = tx)
   tx  <- gsub(pattern = "pstemp_maxval", replace = par[7], x = tx)
   tx  <- gsub(pattern = "pstemp_hival", replace = par[8], x = tx)
-  tx  <- gsub(pattern = "phengdd5rampval", replace = par[9], x = tx)
+  tx  <- gsub(pattern = "aphenmaxval", replace = par[9], x = tx)
   tx  <- gsub(pattern = "randomval", replace = random, x = tx)
   insname <- paste("./tempins",random,".ins",sep="")
   writeLines(tx, con=insname)
-  
-  #runx <- gsub(pattern = "tempins2.ins", replace = insname, x = runit)
-  #writeLines(runx, con=runjobpar)
   
   print("Parameter values:")
   print(round(par,2))
   
   # Run model using new ins file
   system(sprintf("./guess /local/job/$SLURM_JOB_ID/%s", insname))
-  # Run model using new ins file
-  #system("/local/job/$SLURM_JOB_ID/./runjob.sh")
   
   # Read in output from model
   mgpp <- fread(paste("mgpp_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="GPP")
@@ -89,16 +84,14 @@ LPJG <- function(par) {
   return (as.numeric(SSR))
 }
 
-
-start <- c(8,3200, .7, .8,-4,10, 38,25,200) # starting values
-low <- c(6,1350, .5, .6, -5.2,7, 26.6,17.5,100) #lower bound
-up <- c(21,5220, 1, 1, -2.8,13, 49.4,32.5,300) #upper bound for ech parameter (default is inf)
+low <- c(6,1350, .5, .6, 0,7, 26.6,17.5,30) #lower bound
+up <- c(21,5220, 1, 1, 1,13, 49.4,32.5,365) #upper bound for ech parameter (default is inf)
 
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
-               control=DEoptim.control(trace=6, itermax=1000,  
-                                       parallelType=1, packages=c("tidyr","data.table"), 
+               control=DEoptim.control(trace=6,  
+                                       parallelType=1, packages=c("tidyr","dplyr","data.table"), 
                                        parVar=c("df4","ins")))
 
-save(DE1,"DE1.RData")
+save.image("NewPhenImage.RData")
 
 
