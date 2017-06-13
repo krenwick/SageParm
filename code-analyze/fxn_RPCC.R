@@ -65,6 +65,62 @@ RPCC <- function(data,site){
   R$PRCC
 }
 
+RPCCnewphen <- function(data,site){
+  if(site=="mbsec"){lon <- -116.7486}
+  if(site=="losec"){lon <- -116.7356}
+  if(site=="wbsec"){lon <- -116.7132}
+  if(site=="138h08ec"){lon <- -116.7231}
+  b <- fread(data,header=T)
+  
+  # For monthly data:
+  if(ncol(b)==16){
+    names(b)[16] <- "file"
+  }
+  
+  # For annual (sagebrush) data:
+  if(ncol(b)<=9){
+    b=b[,1:7] # deal with 9th column in FPC due to fucked up merge
+    names(b)[7] <- "file"
+  }
+  
+  # select appropriate years (1986-2015)
+  b1 <- b %>% mutate(Year=Year+860) %>% 
+    filter(Year>=1986) %>%
+    mutate(id1=file) %>%
+    separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
+    dplyr::select(-cut) %>%
+    separate(file, into=c("sla","ltor_max","root_up","latosa",
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "pstemp_hi",
+                          "phengdd5","phen_winter", "aphenmax"),
+             sep = "_",extra="drop") %>%
+    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    dplyr::select(-del) %>%
+    mutate(row=seq(1:nrow(.))) %>%
+    gather(parameter,value, sla:aphenmax) %>%
+    separate(value, into=c("name","value"), sep=5, extra="drop") %>%
+    dplyr::select(-name) %>%
+    mutate(value=as.numeric(value)) %>%
+    {if(ncol(b)==16) { # Get annual average if data monthly
+      gather(.,Month,N, Jan:Dec) %>%
+        group_by(Year, parameter,value, row, id) %>%
+        summarise(N_annual=sum(N))
+    } else .} %>%
+    {if(ncol(b)==7) {
+      dplyr::select(., -C3, -Total) %>%
+        rename(N_annual=ARTR)
+    } else .} %>%
+    group_by(parameter,value,id) %>%
+    summarise(mean=mean(N_annual)) %>%
+    spread(parameter,value) %>%
+    ungroup() %>%
+    dplyr::select(mean:sla)
+  
+  # Calculate PRCC
+  R <- pcc(X=b1[,2:12], y=b1[,1], rank=T)
+  R$PRCC
+}
+
 RPCCseas <- function(data){
   b <- fread(data,header=T)
   names(b)[16] <- "file"
@@ -119,6 +175,71 @@ RPCCmonth <- function(data){
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
     gather(parameter,value, sla:leaflong) %>%
+    separate(value, into=c("name","value"), sep=5, extra="drop") %>%
+    dplyr::select(-name) %>%
+    mutate(value=as.numeric(value)) %>%
+    group_by(parameter,value,id,Lon) %>%
+    summarise_each(funs(mean)) %>%
+    spread(parameter,value) %>%
+    ungroup() 
+  b1
+}
+
+RPCCseasphen <- function(data){
+  b <- fread(data,header=T)
+  names(b)[16] <- "file"
+  
+  # select appropriate years (1986-2015)
+  b1 <- b %>% mutate(Year=Year+860) %>% 
+    filter(Year>=1986) %>%
+    mutate(id1=file) %>%
+    separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
+    dplyr::select(-cut) %>%
+    separate(file, into=c("sla","ltor_max","root_up","latosa",
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "pstemp_hi",
+                          "phengdd5","phen_winter", "aphenmax"),
+             sep = "_",extra="drop") %>%
+    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    dplyr::select(-del) %>%
+    mutate(row=seq(1:nrow(.))) %>%
+    gather(parameter,value, sla:aphenmax) %>%
+    separate(value, into=c("name","value"), sep=5, extra="drop") %>%
+    dplyr::select(-name) %>%
+    mutate(value=as.numeric(value)) %>%
+    gather(Month,N, Jan:Dec) %>%
+    group_by(Year, parameter,value, row, id, Lon) %>%
+    mutate(N_annual=sum(N)) %>%
+    spread(Month,N) %>%
+    filter(N_annual!=0) %>%
+    mutate(spring=(Mar+Apr+May)/N_annual, summer=(Jun+Jul+Aug)/N_annual, 
+           fall=(Sep+Oct+Nov)/N_annual) %>%
+    group_by(parameter,value,id,Lon) %>%
+    summarise(spring=mean(spring), summer=mean(summer), fall=mean(fall)) %>%
+    spread(parameter,value) %>%
+    ungroup() 
+  b1
+}
+
+RPCCmonthphen <- function(data){
+  b <- fread(data,header=T)
+  names(b)[16] <- "file"
+  
+  # select appropriate years (1986-2015)
+  b1 <- b %>% mutate(Year=Year+860) %>% 
+    filter(Year>=1986) %>%
+    mutate(id1=file) %>%
+    separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
+    dplyr::select(-cut) %>%
+    separate(file, into=c("sla","ltor_max","root_up","latosa",
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "pstemp_hi",
+                          "phengdd5","phen_winter", "aphenmax"),
+             sep = "_",extra="drop") %>%
+    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    dplyr::select(-del) %>%
+    mutate(row=seq(1:nrow(.))) %>%
+    gather(parameter,value, sla:aphenmax) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
