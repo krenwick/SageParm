@@ -35,6 +35,7 @@ mod <- read.csv("data/ReynoldsC/MODIS/lai_gpp.csv") %>%
 df4 <- merge(df3,mod,by=c("Year","Month","Variable","Site"), all=T) %>%
   mutate(Date=as.Date(Date)) %>%
   filter(Date>="2014-10-01")
+table(df4$Variable)
 
 # Plot Modis vs. flux GPP just for kicks
 ggplot(data=filter(df4,Variable=="GPP"), aes(x=Date,y=Tower)) +
@@ -110,7 +111,7 @@ all <- merge(ever,summer, by=c("Year","Month","Variable","Site")) %>%
   mutate(Variable=replace(Variable,Variable=="mgpp","GPP")) %>%
   mutate(Variable=replace(Variable,Variable=="mnee","NEE")) %>%
   mutate(Variable=replace(Variable,Variable=="mlai","LAI")) %>%
-  merge(.,df4, by=c("Year","Month","Variable","Site"))
+  merge(.,df3, by=c("Year","Month","Variable","Site"))
 
 all$D <- as.yearmon(paste(all$Year, all$Month), "%Y %b")
 all$Date <- as.Date(all$D)
@@ -169,7 +170,9 @@ flux2 <- ggplot(data=NEE, aes(x=Date, y=NEE, color=Source, linetype=Source)) +
   facet_wrap(~Site) +
   xlab("Date") +
   ylab(expression(NEE~(kg~m^{-2}))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_hline(yintercept = 0)
+flux2
 
 ggsave("figures/NEE_ever_summer_flux.pdf", plot=flux2,
        width = 169, height = 140, units = 'mm')
