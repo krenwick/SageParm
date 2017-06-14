@@ -1,0 +1,126 @@
+\documentclass[]{article}
+\usepackage[T1]{fontenc}
+\usepackage[]{dcolumn}
+\usepackage[]{booktabs}
+\usepackage{caption}
+\usepackage{graphicx} 
+\usepackage{tabularx}
+\usepackage[letterpaper, portrait, margin=.75in]{geometry}
+%\captionsetup[table]
+
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Methods}
+\subsection{Model Description}
+- describe LPJ-GUESS generally (1-2 paragraphs)
+- describe how phenology is represented (1-2 paragraphs)
+ phenology options: evergreen, summergreen, and raingreen.
+\subsection{Study Sites}
+- describe RC LTER CZO and why it is ideal: varied terrain with multiple sagebrush species/subspecies, lots of data, ongoing research that could benefit from model.
+\subsection{Data Sources}
+\subsubsection{Flux Data}
+- describe towers and how flux is calculated (ask Aaron to write a paragraph here)
+\subsubsection{LAI}
+- LAI from Pat
+- LAI from MODIS: brief description of how LAI is modeled based on remote sensing data, format/time step, and how/when it was acquired (downloaded from xxx on xx date).
+Field estimates of LAI closely matched the MODIS estimates for the same date (Fig. in appendix), so MODIS LAI was used for all analyses in order to have a full time series. Bi-weekly values for LAI were converted to monthly by interpolating the point estimates to a daily time step then taking the average LAI for each month.
+\subsection{Sensitivity analysis}
+We chose parameters known to be important based on other papers and for which there wasn't good data available for sagebrush. We also included all of the parameters that can affect phenology.
+
+Parameters with |RPCC| > .2 for monthly GPP or LAI were selected for optimization.
+\subsection{Comparison of Phenology Models}
+We compared three different methods of representing phenology for sagebrush. First, we ran the model using standard parameter values for the shrub functional type (cite). We did this for each of the three phenology options available in LPJ-GUESS. Second, we optimized parameters that the sensitivity analysis identified as having a large effect on seasonal or annual GPP and LAI. Third, we developed a new phenology type for sagebrush that is capable of representing both cohorts of leaves.
+
+The new model... describe model and new parameters.
+
+In addition to these new parameters, several existing phenology parameters needed to be optimized.
+
+Model output from each parameterization or formulation was compared to monthly GPP data measured at the flux towers and monthly LAI data derived from MODIS. To examine how the different phenology formulas affect estimates of productivity and carbon storage, we compared estimates of the 30-year trend in NEE and biomass from each model.
+
+\subsection{Parameter optimization}
+We optimized two sets of parameters: those selected from the sensitivity analysis, and a new set of parameters that also included parameters necessary for the new phenology type.
+
+We tested several methods of optimization: site vs. combined and GPP vs LAI.
+
+We compared three different data sources for optimization: monthly GPP, monthly LAI, or both. GPP is a more sensitive indicator of ecosystem processes and is commonly used for parameter optimization (cite, cite), but field data on LAI is easy to acquire and does not require and specialized equipment. If LAI performs adequately for parameter optimization, it could potentially be used to parameterize a wider range of species in areas where flux data is not readily available. Compare parameter values and RMSE, then move forward with parameters from run with lowest RMSE.
+
+
+Compare parameter values from optimization pre- and post- new model.
+
+
+
+\section{Results}
+Model runs using the standard parameterization with each of the three phenology types revealed substantial differences when compared to the seasonal patterns of GPP from the flux towers and LAI from MODIS (Fig. 1). 
+\begin{figure}[htbp]
+	\includegraphics[width=\linewidth]{GPP_LAI_origpheno.pdf}
+	\caption{Modeled GPP (a-d) and LAI (e-h) compared to GPP measured at flux sites and LAI derived from MODIS data. Panels represent different sites. The black lines represent the reference data while the colored lines represent model output derived using standard parameters and each of the three phenology types available in LPJ-GUESS.}
+	\label{fig:origpheno}
+\end{figure}LPJ-GUESS tended to over-estimate GPP in the fall regardless of which phenology type was used, and the evergreen and summergreen types also over-estimated spring GPP at the two higher-elevation sites. The summergreen phenology type tended to under-estimate spring GPP. All three phenology types resulted in a large over-estimation of LAI during the summer season. Model runs with the summergreen phenology type compared most favorably to the data (lowest root mean squared error for both GPP and LAI), so we used this phenology type for the sensitivity analysis.
+
+\section{Tables and Figures}
+\begin{table}[ht]
+	\centering
+\caption{RPCCs for the six most influential model parameters, ranked by the mean across all output variables. Only parameters where |RPCC| > 0.2 for at least one variable are shown. Each RPCC is the mean across all four sites. Because the sign of RPCC differed among variables, we show the mean of the absolute values of RCPPs.} 
+\begin{tabular}{lrrrrrrrr}
+	\toprule
+	% & is a stand-in for a column
+	&& \multicolumn{2}{c}{Ecosystem} & \multicolumn{4}{c}{Sagebrush} \\
+	\cmidrule(lr){3-4} \cmidrule(lr){5-8}
+	%Variable  &  \multicolumn{1}{r}{Mean}  &  \multicolumn{1}{r}{Std Dev}  &       \multicolumn{1}{r}{Mean}  &  \multicolumn{1}{r}{Std Dev}  &  \multicolumn{1}{r}{Difference}  \\
+	%\midrule
+	\input{RPCCallOuts}
+	%\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\caption{RPCCs for the seasonal variables at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
+	\begin{tabularx}{\textwidth}{lrrrrrrrrrrrr}
+		\toprule
+		% & is a stand-in for a column
+		& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
+		\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+		%Parameter & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec   \\
+		%\midrule
+		\input{RPCC_seas}
+		%\bottomrule
+	\end{tabularx}
+\end{table}
+
+\section{Extras not for manuscript}
+\begin{table}[htbp]
+	\centering
+	\caption{RPCC values for CMASS for all four sites. Only parameters where the mean |RPCC| > 0.2 are shown.}
+	\begin{tabular}{lrrrrr}
+		\toprule
+		\multicolumn{2}{c}{} & \multicolumn{4}{c}{Site} \\
+		\cmidrule(lr){3-6}
+		\input{cmass}
+	\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+	\includegraphics[width=\linewidth]{LHC_parm_estimates.pdf}
+	\caption{Parameter values determined based on minimizing the RMSE for modeled vs. measured GPP for all sites together ("All") and each site separately. The violin plots represent the distribution of parameter values represented in the best 2.5\% of model runs. The red dot represents the parameter value from the single best model run. The parameter range tested is shown using dashed lines, and the standard parameter value is shown with a blue dotted line. For est\_max, ltor\_max, and root\_up, the standard value coincides with either the minimum or maximum value tested. For SLA and latosa, the standard value is outside the range tested because the ranges were defined by sagebrush-specific values found in the literature.}
+	\label{fig:LHCparms}
+\end{figure}
+
+\begin{figure}[htbp]
+	\includegraphics[width=\linewidth]{flux_mod_comparison.pdf}
+	\caption{Monthly GPP for each site ("Tower") compared to modeled GPP from three different model parameterizations. "Standard" is the standard set of parameters used for the shrub functional type, "Best Overall" is the parameter set with the lowest RMSE across all four sites, and "Best for Site" is the parameter set with the lowest RMSE for that particular site.}
+	\label{fig:fluxmod}
+\end{figure}
+\section{}
+
+\end{document}
