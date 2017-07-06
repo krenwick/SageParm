@@ -47,7 +47,7 @@
 	\bottomrule
 	\end{tabular}
 \begin{tablenotes}
-	\item[1] Add citations here
+	\item[1] Minimum from \citet{Olsoy2016}; maximum from \citet{Ganskopp1986}
 	\item[2] \citet{Ganskopp1986}
 \end{tablenotes}
 \end{threeparttable}
@@ -88,12 +88,28 @@
 
 \begin{table}[ht]
 	\begin{threeparttable}
-	\caption{RPCCs for the eight model parameters where |RPCC| > 0.2 for annual GPP or LAI. Each RPCC is the mean across all four sites.} 
+	\caption{RPCCs for the model parameters in the new phenology routine where |RPCC| > 0.2 for annual GPP or LAI. Each RPCC is the mean across all four sites.} 
 	\begin{tabular}{lrr}
 		\toprule
 		\input{RPCCnewphen}
 	\end{tabular}
 \end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	\begin{threeparttable}
+		\caption{RPCCs for the seasonal variables from the new phenology routine at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
+		\begin{tabularx}{\textwidth}{lrrrrrrrrrrrr}
+			\toprule
+			% & is a stand-in for a column
+			& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
+			\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+			%Parameter & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec   \\
+			%\midrule
+			\input{RPCC_seas_newphen}
+			%\bottomrule
+		\end{tabularx}
+	\end{threeparttable}
 \end{table}
 
 \section{Figures}
@@ -108,6 +124,6 @@
 
 \section{References}
 \bibliographystyle{ecology}
-\bibliography{SageParm}
+\bibliography{../../bibs/SageParm}
 
 \end{document}
