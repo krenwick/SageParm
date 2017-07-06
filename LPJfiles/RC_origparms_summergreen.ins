@@ -12,16 +12,16 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 		
 ! Climate data
 	!Spin-up (Detrended)
-	param "file_temp_spinup" (str "Daymet3_ID/DETRENDED_tmean_1980-2015.nc4")
-	param "file_prec_spinup" (str "Daymet3_ID/DETRENDED_prcp_1980-2015.nc4")	
-	param "file_sun_spinup" (str "Daymet3_ID/DETRENDED_srad24_1980-2015.nc4")
-	param "file_wetd_spinup" (str "Daymet3_ID/DETRENDED_wetdays_1980-2015.nc4")
+	param "file_temp_spinup" (str "Daymet3_ID/DETRENDED_tmean_1980-2016.nc4")
+	param "file_prec_spinup" (str "Daymet3_ID/DETRENDED_prcp_1980-2016.nc4")	
+	param "file_sun_spinup" (str "Daymet3_ID/DETRENDED_srad24_1980-2016.nc4")
+	param "file_wetd_spinup" (str "Daymet3_ID/DETRENDED_wetdays_1980-2016.nc4")
 	
 	!Historic (observations)
-	param "file_temp" (str "Daymet3_ID/tmean_1980-2015.nc4")
-	param "file_prec" (str "Daymet3_ID/prcp_1980-2015.nc4")
-	param "file_sun" (str "Daymet3_ID/srad24_1980-2015.nc4")
-	param "file_wetd" (str "Daymet3_ID/wetdays_1980-2015.nc4")
+	param "file_temp" (str "Daymet3_ID/tmean_1980-2016.nc4")
+	param "file_prec" (str "Daymet3_ID/prcp_1980-2016.nc4")
+	param "file_sun" (str "Daymet3_ID/srad24_1980-2016.nc4")
+	param "file_wetd" (str "Daymet3_ID/wetdays_1980-2016.nc4")
 
 ! Soil data
 	!param "file_clay" (str "HWSD1km_wusa/hwsd1km_clay_wusa.nc")
@@ -78,7 +78,7 @@ file_mwcont_lower "mwcont_lower.out"
 param "annual_output" (num 1)
 title "LPJ-GUESS (guess2008) cohort mode"
 vegmode "cohort"
-nyear 1156 !1156 to run to 2015
+nyear 1157 !1156 to run to 2015
 ifdailynpp 1
 ifdailydecomp 1 !KE 8.19.14 changed to daily 1 from monthly 0
 ifcalcsla 0
