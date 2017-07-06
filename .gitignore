@@ -17,3 +17,5 @@ CO2/
 code-analyze/old/
 testout/
 data/
+*.nc
+*.nc4
