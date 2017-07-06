@@ -92,12 +92,12 @@ RPCCnewphen <- function(data,site){
     separate(file, into=c("sla","ltor_max","root_up","latosa",
                           "pstemp_lo","pstemp_min",
                           "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax"),
+                          "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%
-    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    separate(downramp, into=c("downramp","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:aphenmax) %>%
+    gather(parameter,value, sla:downramp) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -117,7 +117,7 @@ RPCCnewphen <- function(data,site){
     dplyr::select(mean:sla)
   
   # Calculate PRCC
-  R <- pcc(X=b1[,2:12], y=b1[,1], rank=T)
+  R <- pcc(X=b1[,2:13], y=b1[,1], rank=T)
   R$PRCC
 }
 
@@ -198,12 +198,12 @@ RPCCseasphen <- function(data){
     separate(file, into=c("sla","ltor_max","root_up","latosa",
                           "pstemp_lo","pstemp_min",
                           "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax"),
+                          "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%
-    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    separate(downramp, into=c("downramp","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:aphenmax) %>%
+    gather(parameter,value, sla:downramp) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -234,12 +234,12 @@ RPCCmonthphen <- function(data){
     separate(file, into=c("sla","ltor_max","root_up","latosa",
                           "pstemp_lo","pstemp_min",
                           "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax"),
+                          "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%
-    separate(aphenmax, into=c("aphenmax","del"), sep=-5) %>%
+    separate(downramp, into=c("downramp","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:aphenmax) %>%
+    gather(parameter,value, sla:downramp) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%

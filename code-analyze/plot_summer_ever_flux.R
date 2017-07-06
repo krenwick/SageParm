@@ -52,7 +52,7 @@ vars=c("mgpp","mrh","mra","mnee","mevap","maet","mlai")
 for(var in vars) {
   data=paste("RCout/orig_summer_",var,".out", sep="")
   b <- fread(data, header=T)
-  # select appropriate years (2014-2015)
+  # select appropriate years (2014-2016)
   b1 <- b %>% mutate(Year=Year+860) %>% 
     filter(Year>=2014) %>%
     gather(Month,Summergreen, Jan:Dec) %>%
@@ -111,7 +111,7 @@ all <- merge(ever,summer, by=c("Year","Month","Variable","Site")) %>%
   mutate(Variable=replace(Variable,Variable=="mgpp","GPP")) %>%
   mutate(Variable=replace(Variable,Variable=="mnee","NEE")) %>%
   mutate(Variable=replace(Variable,Variable=="mlai","LAI")) %>%
-  merge(.,df3, by=c("Year","Month","Variable","Site"))
+  merge(.,df4, by=c("Year","Month","Variable","Site"))
 
 all$D <- as.yearmon(paste(all$Year, all$Month), "%Y %b")
 all$Date <- as.Date(all$D)
