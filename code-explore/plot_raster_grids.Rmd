@@ -1,0 +1,283 @@
+---
+title: "Examine where sites fall in relation to grid cells"
+author: "Katie Renwick"
+date: "6/28/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=F, warning=F, include=F)
+```
+
+```{r}
+rm(list=ls())
+library(tidyverse); theme_set(theme_bw(base_size=12)) # sized for ppt
+library(rgdal)
+library(raster)
+library(zoo) #fucking hate time series!
+
+# paths to data and folder for figures
+dpath <- "/Users/poulterlab1/Documents/SageParm/data/"
+fpath <- "/Users/poulterlab1/Documents/SageParm/figures/"
+cpath <- "/Users/poulterlab1/Documents/SageParm/Daymet3_ID/" # climate data
+
+# color scheme
+ggcolor <- c("#80cdc1","#018571", "#a6611a","#dfc27d")
+
+# coordinates of flux sites:
+sites <- read.csv(paste(dpath, "ReynoldsC/EC-CoreSites-coords.csv", sep=""))
+ll <- dplyr::select(sites, Lon,Lat)
+Site <- dplyr::select(sites, Site)
+
+# Pull in daymet3 data, extract values for points
+#Loop through the months and sample the climate data
+nmonths <- 1
+
+for(m in 1:nmonths){
+  print(paste(round((m/nmonths)*100,2),"% finished"))
+  #Sample tmean
+  tmean.month.m <- raster(paste(cpath, "tmean_1980-2015.nc4", sep=""), 
+                          band=(m+408), varname="tmean")    
+
+} 
+
+```
+
+# Daymet 1km grid cells
+## Used for LPJ-GUESS climate inputs (temperature, precipitation, and solar radiation)
+
+
+```{r, include=T}
+################################################################################
+# Plot sites over Daymet grid
+# Make object to crop raster
+b <- as(extent(-116.7,-116.77,43.06,43.175), 'SpatialPolygons')
+crs(b) <- crs(tmean.month.m)
+rb <- crop(tmean.month.m, b)
+
+#convert the raster to points for plotting
+map.p <- rasterToPoints(rb)
+df <- data.frame(map.p)
+colnames(df) <- c("Longitude", "Latitude", "MAT")
+
+## Extract polygons
+pp <- rasterToPolygons(rb, dissolve=TRUE)
+
+## Convert SpatialPolygons to a format usable by ggplot2
+outline <- fortify(pp)
+
+# Read in the MODIS scene
+mod1 <- raster(paste(dpath,"ReynoldsC/MODIS/MOD17A2.005_Gpp_1km_doy2016169_aid0001.tif",
+                     sep=""))
+mod2 <- crop(mod1,b)
+mod3 <- rasterToPolygons(mod2,dissolve=F)
+mod4 <- fortify(mod3)
+
+# Plot Daymet grid with study sites shown
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  #geom_raster(aes(fill=MAT)) +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  #geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# MODIS 1km grid cells
+## Used for LAI and to compare GPP
+
+```{r, include=T}
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  #geom_raster(aes(fill=MAT)) +
+  #geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# STATSGO 1km grid cells
+## Used for soil input in LPJ-GUESS
+
+```{r, include=T}
+s1 <- raster("/Users/poulterlab1/Documents/SageParm/STATSGO/gcs84_conus_CLAY.nc4",
+             warn=F)
+s2 <- crop(s1,b)
+s3 <- rasterToPolygons(s2,dissolve=F)
+s4 <- fortify(s3)
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# All grids together, zooming in on mbsec
+```{r, include=F}
+s1 <- raster("/Users/poulterlab1/Documents/SageParm/STATSGO/gcs84_conus_CLAY.nc4")
+s2 <- crop(s1,b)
+s3 <- rasterToPolygons(s2,dissolve=F)
+s4 <- fortify(s3)
+ggplot(data=df, aes(y=Latitude, x=Longitude)) +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+```{r, include=T}
+#install.packages("ggmap", type = "source")
+library(ggmap)
+myLoc <- c(-119.9,39.145, -119.85, 39.2) # define bounding box
+sat <- get_map(location=myLoc, source="google", maptype="satellite", crop=FALSE)
+myLocation <- c(-116.7,43.06,-116.77,43.175)
+loc <- c(-116.7486,43.06448)
+
+myMap <- get_map(location=loc, source="google", maptype="satellite", crop=FALSE,zoom=15)
+
+ggmap(myMap) +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .0005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# All grids together, zooming in on wbsec
+
+```{r, include=T}
+loc <- c(-116.7132,43.16754)
+
+myMap <- get_map(location=loc, source="google", maptype="satellite", crop=FALSE,zoom=15)
+
+ggmap(myMap) +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .0005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# All grids together, zooming in on losec
+
+```{r, include=T}
+loc <- c(-116.7356,43.14389)
+
+myMap <- get_map(location=loc, source="google", maptype="satellite", crop=FALSE,zoom=15)
+
+ggmap(myMap) +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .0005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+# All grids together, zooming in on h08ec
+
+```{r, include=T}
+loc <- c(-116.7231,43.12071)
+
+myMap <- get_map(location=loc, source="google", maptype="satellite", crop=FALSE,zoom=15)
+
+ggmap(myMap) +
+  geom_path(data=outline,aes(x=long,y=lat,group=group)) +
+  geom_path(data=mod4,aes(x=long,y=lat,group=group),color="blue") +
+  geom_path(data=s4,aes(x=long,y=lat,group=group),color="green") +
+  geom_point(data=sites, aes(x=Lon, y=Lat), color="red", size=1, shape=16) +
+  geom_text(data=sites,aes(x=Lon, y=Lat,label=Site),nudge_y = .0005, color="red") +
+  theme_bw() +
+  coord_equal() +
+  scale_fill_gradient("Dec. 2015 Temp.") +
+  theme(axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16, angle=90),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "right",
+        legend.key = element_blank()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```

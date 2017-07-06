@@ -1,0 +1,190 @@
+---
+title: "Untitled"
+author: "Katie Renwick"
+date: "6/22/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=F, warning=F, include=F)
+knitr::opts_chunk$set(root.dir = '/tmp')
+```
+
+```{r}
+################################################################################
+# Examine output from standard run then modifying vcmax
+################################################################################
+rm(list=ls())
+library(tidyverse)
+library(data.table)
+library(zoo)
+
+# SET WORKING DIRECTORY:
+setwd("~/Documents/SageParm")
+
+################################################################################
+# Read in the flux/lai data:
+# Read in GPP flux data
+GPP <- read.csv("data/RCflux_15_16.csv") %>%
+  dplyr::filter(Variable=="GPP")
+
+# Pull in LAI data from MODIS
+mod <- read.csv("data/ReynoldsC/MODIS/lai_gpp.csv") %>%
+  dplyr::mutate(Latitude=round(Latitude,2)) %>%
+  dplyr::mutate(Site=ifelse(Latitude==43.06, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Latitude==43.12, "h08ec",Site)) %>%
+  dplyr::mutate(Site=ifelse(Latitude==43.14, "losec",Site)) %>%
+  dplyr::mutate(Site=ifelse(Latitude==43.17, "wbsec",Site)) %>%
+  dplyr::rename(Year=year) %>%
+  dplyr::mutate(Month=month.abb[month]) %>%
+  tidyr::gather(Variable, Tower, LAI:GPP) %>%
+  dplyr::filter(Variable=="LAI") %>%
+  dplyr::select(Year,Month,Variable,Site,Tower)  
+
+# Merge flux with MODIS LAI
+df4 <- rbind.data.frame(mod,GPP)
+
+################################################################################
+# Pull DOWNRAMP output into R:
+gpp1 <- fread("testout/downramp_mgpp.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,Downramp, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="GPP") %>%
+  dplyr::select(Year, Month,Site,Variable,Downramp) %>%
+  spread(Variable,Downramp) %>%
+  dplyr::select(Year,Month,Site,GPP) %>%
+  gather(Variable, Downramp, GPP)
+
+lai1 <- fread("testout/downramp_mlai.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,Downramp, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="LAI") %>%
+  dplyr::select(Year, Month,Site,Variable,Downramp) %>%
+  spread(Variable,Downramp) %>%
+  dplyr::select(Year,Month,Site,LAI) %>%
+  gather(Variable, Downramp, LAI)
+
+# Output from no downramp, optim parameters
+gpp2 <- fread("testout/optim_mgpp.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,Optim, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="GPP") %>%
+  dplyr::select(Year, Month,Site,Variable,Optim) %>%
+  spread(Variable,Optim) %>%
+  dplyr::select(Year,Month,Site,GPP) %>%
+  gather(Variable, Optim, GPP)
+
+lai2 <- fread("testout/optim_mlai.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,Optim, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="LAI") %>%
+  dplyr::select(Year, Month,Site,Variable,Optim) %>%
+  spread(Variable,Optim) %>%
+  dplyr::select(Year,Month,Site,LAI) %>%
+  gather(Variable, Optim, LAI)
+
+# Output from no downramp, VCMAX * 3
+gpp3 <- fread("testout/vcmod3_mgpp.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,VcMod, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="GPP") %>%
+  dplyr::select(Year, Month,Site,Variable,VcMod) %>%
+  spread(Variable,VcMod) %>%
+  dplyr::select(Year,Month,Site,GPP) %>%
+  gather(Variable, VcMod, GPP)
+
+# Pull LAI output from initial test back in to R:
+lai3 <- fread("testout/vcmod3_mlai.out", header=T) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2014) %>%
+  gather(Month,VcMod, Jan:Dec) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(Variable="LAI") %>%
+  dplyr::select(Year, Month,Site,Variable,VcMod) %>%
+  spread(Variable,VcMod) %>%
+  dplyr::select(Year,Month,Site,LAI) %>%
+  gather(Variable, VcMod, LAI)
+
+
+################################################################################
+# Merge model output from the runs
+################################################################################
+GPPall <- merge(gpp1,gpp2, by=c("Year","Month","Site","Variable")) %>%
+  merge(.,gpp3,by=c("Year","Month","Site","Variable")) %>%
+  merge(.,df4, by=c("Year","Month","Site","Variable")) %>%
+  gather(Source, GPP, Downramp:Tower) %>%
+  mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
+  mutate(Date=as.Date(D)) 
+
+# Merge with modis data
+LAIall <- merge(lai1,lai2, by=c("Year","Month","Site","Variable")) %>%
+  merge(.,lai3, by=c("Year","Month","Site","Variable")) %>%
+  merge(.,df4,by=c("Year","Month","Site","Variable")) %>%
+  gather(Source, LAI, Downramp:Tower) %>%
+  mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
+  mutate(Date=as.Date(D))
+```
+
+# GPP and LAI from EC tower/MODIS compared to three model runs:
+1. Optim: new phenology (phen_winter and aphenmax), optimized parameters
+2. downramp: same as Optim, but looses leaves gradually
+3. VcMod: same as Optim, but with scalar that multiplies VcMax by 3
+
+```{r, include=T}
+# Plot GPP:
+ggplot(data=GPPall, aes(x=Date, y=GPP, color=Source)) +
+  geom_point() +
+  geom_line() +
+  #scale_color_manual(name="Model",
+                    # breaks=c("Model","VcMod","Tower"),
+                     #labels=c("Downramp","NewPhenOptim","Tower"),
+                     #values=c("dodgerblue4","black","forestgreen")) +
+  facet_wrap(~Site) +
+  xlab("Date") +
+  ylab(expression(GPP~(kgC~m^{-2}))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme_bw()
+
+
+# Plot LAI:
+ggplot(data=LAIall, aes(x=Date, y=LAI, color=Source)) +
+  geom_point() +
+  geom_line() +
+  #scale_color_manual(name="Model",
+                    # breaks=c("Model","VcMod","Tower"),
+                     #labels=c("Downramp","NewPhenOptim","MODIS"),
+                     #values=c("dodgerblue4","black","forestgreen")) +
+  facet_wrap(~Site) +
+  xlab("Date") +
+  ylab("LAI") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme_bw()
+```
