@@ -1,5 +1,6 @@
 ################################################################################
 # Look at measured water content vs. modeled
+# This uses original parameters, STATSGO soil
 ################################################################################
 rm(list=ls())
 library(tidyverse); theme_set(theme_bw(base_size=10))
@@ -111,3 +112,9 @@ ggplot(data=both, aes(x=Date, y=MU, color=Site)) +
   geom_point() +
   geom_line() +
   facet_wrap(~Source)
+
+ggplot(data=both, aes(x=Date, y=ML, color=Site)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Source)
+
