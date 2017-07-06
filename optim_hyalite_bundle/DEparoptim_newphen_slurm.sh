@@ -22,20 +22,19 @@
 # --mem 256000 request bigger node
 
 # These are default settings
-#SBATCH -t 70:00:00
+#SBATCH -t 60:00:00
 #SBATCH -N 1
-#SBATCH -n 2
+#SBATCH -n 32
 
 #SBATCH -p priority
 #SBATCH --no-requeue
 
 # These settings get changed by Subset script
-#SBATCH -J DEparoptim1_summergreen1
+#SBATCH -J optim_newphen
 #SBATCH --mail-user katie.renwick@gmail.com
 #SBATCH --mail-type=ALL
-#SBATCH --exclusive
 
-#SBATCH --mem-per-cpu 4000
+#SBATCH --mem-per-cpu 2000
 
 
 
@@ -44,7 +43,7 @@
 # Create temporary directory
 
 jobdir="/local/job/$SLURM_JOB_ID"
-jobname=DEparoptim1_summergreen1
+jobname=optim_newphen
 modelDir=/home/katie.renwick/scripts/LPJ-GUESS
 glAbrv=grid
 scriptsDir=/home/katie.renwick/scripts
@@ -57,10 +56,10 @@ for dir in /mnt/lustrefs/store/katie.renwick/Climate_LPJGUESS/Daymet3_ID /mnt/lu
 done
 
 # Copy LPJGUESS executable
-rsync -avhP $modelDir/ModelFiles/modules/guess /$jobdir 
+rsync -avhP $modelDir/phenmodules/guess /$jobdir 
 
-# Copy instruction files
-for fil in $scriptsDir/Slurm_scripts/Optimization/summergreen_optim1_LMpar.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim.R $scriptsDir/Slurm_scripts/Optimization/runjob.sh; do
+# Copy job-specific files (CHECK!)
+for fil in $scriptsDir/Slurm_scripts/Optimization/optim2_newphen.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim_newphen.R $scriptsDir/Slurm_scripts/Optimization/runjob.sh; do
 	rsync -avhP $fil $jobdir/
 done
 
@@ -72,13 +71,13 @@ mkdir $jobdir/Output_$jobname
 ###############
 
 # Run R script
-./runRDEpar.sh
+./runRnewphen.sh
 wait
 
 
 ############################---------------------------------
 outdir="./Output_$jobname/"
-mv $jobdir/DE1parimage.RData $jobdir/Output_$jobname
+mv $jobdir/NewPhenImage.RData $jobdir/Output_$jobname
 ############################
 
 # Copy output data to work directory

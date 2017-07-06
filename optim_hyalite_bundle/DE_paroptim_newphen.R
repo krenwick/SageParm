@@ -53,7 +53,7 @@ LPJG <- function(par) {
   tx  <- gsub(pattern = "pstemp_lowval", replace = par[6], x = tx)
   tx  <- gsub(pattern = "pstemp_maxval", replace = par[7], x = tx)
   tx  <- gsub(pattern = "pstemp_hival", replace = par[8], x = tx)
-  tx  <- gsub(pattern = "aphenmaxval", replace = par[9], x = tx)
+  tx  <- gsub(pattern = "aphenval", replace = par[9], x = tx)
   tx  <- gsub(pattern = "randomval", replace = random, x = tx)
   insname <- paste("./tempins",random,".ins",sep="")
   writeLines(tx, con=insname)
@@ -69,7 +69,7 @@ LPJG <- function(par) {
   mlai <- fread(paste("mlai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
   out <- rbind.data.frame(mgpp,mlai) %>%
     dplyr::mutate(Year=Year+860) %>% 
-    dplyr::filter(Year>=2014) %>%
+    dplyr::filter(Year>=2015) %>%
     tidyr::gather(Month,Model, Jan:Dec) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%

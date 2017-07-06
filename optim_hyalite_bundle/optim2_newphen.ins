@@ -10,16 +10,16 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 		
 ! Climate data
 	!Spin-up (Detrended)
-	param "file_temp_spinup" (str "Daymet3_ID/DETRENDED_tmean_1980-2015.nc4")
-	param "file_prec_spinup" (str "Daymet3_ID/DETRENDED_prcp_1980-2015.nc4")	
-	param "file_sun_spinup" (str "Daymet3_ID/DETRENDED_srad24_1980-2015.nc4")
-	param "file_wetd_spinup" (str "Daymet3_ID/DETRENDED_wetdays_1980-2015.nc4")
+	param "file_temp_spinup" (str "Daymet3_ID/DETRENDED_tmean_1980-2016.nc4")
+	param "file_prec_spinup" (str "Daymet3_ID/DETRENDED_prcp_1980-2016.nc4")	
+	param "file_sun_spinup" (str "Daymet3_ID/DETRENDED_srad24_1980-2016.nc4")
+	param "file_wetd_spinup" (str "Daymet3_ID/DETRENDED_wetdays_1980-2016.nc4")
 	
 	!Historic (observations)
-	param "file_temp" (str "Daymet3_ID/tmean_1980-2015.nc4")
-	param "file_prec" (str "Daymet3_ID/prcp_1980-2015.nc4")
-	param "file_sun" (str "Daymet3_ID/srad24_1980-2015.nc4")
-	param "file_wetd" (str "Daymet3_ID/wetdays_1980-2015.nc4")
+	param "file_temp" (str "Daymet3_ID/tmean_1980-2016.nc4")
+	param "file_prec" (str "Daymet3_ID/prcp_1980-2016.nc4")
+	param "file_sun" (str "Daymet3_ID/srad24_1980-2016.nc4")
+	param "file_wetd" (str "Daymet3_ID/wetdays_1980-2016.nc4")
 
 ! Soil data
 	param "file_clay" (str "STATSGO/gcs84_conus_CLAY.nc4")
@@ -31,9 +31,6 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 outputdirectory "./"
 file_mgpp "mgpp_randomval.txt"
 file_mlai "mlai_randomval.txt"
-file_lai "lai_randomval.txt"
-file_npp "npp_randomval.txt"
-file_cmass "cmass_randomval.txt"
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -43,7 +40,7 @@ file_cmass "cmass_randomval.txt"
 param "annual_output" (num 1)
 title "LPJ-GUESS (guess2008) cohort mode"
 vegmode "cohort"
-nyear 1156 !1153
+nyear 1157 !1153
 ifdailynpp 1
 ifdailydecomp 1 !KE 8.19.14 changed to daily 1 from monthly 0
 ifcalcsla 0
@@ -362,7 +359,7 @@ pft "ARTR" (
 	kest_pres 1
 	litterme 0.3
 	phen_winter phen_winterval
-	aphenmax aphenmaxval
+	aphenmax aphenval
 )
 
 pft "C3" (

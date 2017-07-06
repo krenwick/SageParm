@@ -39,7 +39,6 @@ df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
 
 # First, read ins into memory:
 ins  <- readLines("summergreen_optim1_LMpar.ins") # only outputs GPP and LAI
-#runit <- readLines("runjob.sh")
 
 # NOTE: to run in paralle might need to wrap in foreach
 # Otherwise would over-write the temp ins file (I think)
@@ -59,23 +58,18 @@ LPJG <- function(par) {
   insname <- paste("./tempins",random,".ins",sep="")
   writeLines(tx, con=insname)
   
-  #runx <- gsub(pattern = "tempins2.ins", replace = insname, x = runit)
-  #writeLines(runx, con=runjobpar)
-  
   print("Parameter values:")
   print(round(par,2))
   
   # Run model using new ins file
   system(sprintf("./guess /local/job/$SLURM_JOB_ID/%s", insname))
-  # Run model using new ins file
-  #system("/local/job/$SLURM_JOB_ID/./runjob.sh")
   
   # Read in output from model
   mgpp <- fread(paste("mgpp_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="GPP")
   mlai <- fread(paste("mlai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
   out <- rbind.data.frame(mgpp,mlai) %>%
     dplyr::mutate(Year=Year+860) %>% 
-    dplyr::filter(Year>=2014) %>%
+    dplyr::filter(Year>=2015) %>%
     tidyr::gather(Month,Model, Jan:Dec) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
@@ -100,6 +94,6 @@ DE1 <- DEoptim(lower=low,upper=up,fn=LPJG,
                                        parallelType=1, packages=c("tidyr","dplyr","data.table"), 
                                        parVar=c("df4","ins")))
 
-save(DE1,"DE1par.RData")
+save.image("DE1parimage.RData")
 
 
