@@ -22,7 +22,7 @@
 # --mem 256000 request bigger node
 
 # These are default settings
-#SBATCH -t 60:00:00
+#SBATCH -t 12:00:00
 #SBATCH -N 1
 #SBATCH -n 32
 
@@ -59,11 +59,11 @@ done
 rsync -avhP $modelDir/phenmodules/guess /$jobdir 
 
 # Copy job-specific files (CHECK!)
-for fil in $scriptsDir/Slurm_scripts/Optimization/optim2_newphen.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim_newphen.R $scriptsDir/Slurm_scripts/Optimization/runjob.sh; do
+for fil in $scriptsDir/Slurm_scripts/Optimization/optim2_newphen.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim_newphen.R $scriptsDir/Slurm_scripts/Optimization/FieldLaiCover.csv; do
 	rsync -avhP $fil $jobdir/
 done
 
-rsync -avhP $scriptsDir/Slurm_scripts/Optimization/runRDE.sh /$jobdir 
+rsync -avhP $scriptsDir/Slurm_scripts/Optimization/runRnewphen.sh /$jobdir 
 
 # Make or copy output directories
 mkdir $jobdir/Output_$jobname

@@ -22,9 +22,9 @@
 # --mem 256000 request bigger node
 
 # These are default settings
-#SBATCH -t 70:00:00
+#SBATCH -t 10:00:00
 #SBATCH -N 1
-#SBATCH -n 2
+#SBATCH -n 32
 
 #SBATCH -p priority
 #SBATCH --no-requeue
@@ -35,7 +35,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --exclusive
 
-#SBATCH --mem-per-cpu 4000
+#SBATCH --mem-per-cpu 2000
 
 
 
@@ -60,11 +60,11 @@ done
 rsync -avhP $modelDir/ModelFiles/modules/guess /$jobdir 
 
 # Copy instruction files
-for fil in $scriptsDir/Slurm_scripts/Optimization/summergreen_optim1_LMpar.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim.R $scriptsDir/Slurm_scripts/Optimization/runjob.sh; do
+for fil in $scriptsDir/Slurm_scripts/Optimization/summergreen_optim1_LMpar.ins $scriptsDir/Slurm_scripts/Optimization/lai_gpp.csv $scriptsDir/Slurm_scripts/Optimization/RCflux_15_16.csv $scriptsDir/Slurm_scripts/Optimization/FieldLaiCover.csv $scriptsDir/Slurm_scripts/Optimization/DE_paroptim.R; do
 	rsync -avhP $fil $jobdir/
 done
 
-rsync -avhP $scriptsDir/Slurm_scripts/Optimization/runRDE.sh /$jobdir 
+rsync -avhP $scriptsDir/Slurm_scripts/Optimization/runRDEpar.sh /$jobdir 
 
 # Make or copy output directories
 mkdir $jobdir/Output_$jobname

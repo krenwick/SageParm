@@ -9,6 +9,9 @@ library(tidyr)
 # SET WORKING DIRECTORY:
 setwd("./")
 
+# to test on home laptop:
+#setwd("~/Documents/SageParm/optim_hyalite_bundle")
+
 # Read in monthly GPP data
 GPP <- read.csv("RCflux_15_16.csv") %>%
   dplyr::filter(Variable=="GPP")
@@ -33,6 +36,9 @@ df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
                                                        mean=mean(Tower),max=max(Tower))
 # mean of LAI is 6.33 times higher than GPP
 
+# Read in field LAI and cover
+field <- read.csv("FieldLaiCover.csv")
+
 # Function to run LPJ-GUESS and return vector of residuals----------------------
 # Depends on ins and flux data already existing in memory (ins and df4)
 # Depends on tidyr and data.table packages
@@ -49,7 +55,8 @@ LPJG <- function(par) {
   tx  <- gsub(pattern = "ltor_maxval", replace = par[3], x = tx)
   tx  <- gsub(pattern = "rootdistval", replace = par[4], x = tx)
   tx  <- gsub(pattern = "rootdist2", replace = (1-par[4]), x = tx)
-  tx  <- gsub(pattern = "pstemp_minval", replace = par[5], x = tx)
+  #tx  <- gsub(pattern = "pstemp_minval", replace = par[5], x = tx)
+  tx  <- gsub(pattern = "est_maxval", replace = par[5], x = tx)
   tx  <- gsub(pattern = "pstemp_lowval", replace = par[6], x = tx)
   tx  <- gsub(pattern = "pstemp_maxval", replace = par[7], x = tx)
   tx  <- gsub(pattern = "pstemp_hival", replace = par[8], x = tx)
@@ -75,24 +82,37 @@ LPJG <- function(par) {
     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
-    dplyr::select(Year, Month,Variable,Site,Model)
+    dplyr::select(Year, Month,Variable,Site,Model) %>%
+    dplyr::filter(Variable!="LAI")
   b <- merge(out,df4, by=c("Year","Month","Variable","Site"))
   resid <- b %>% dplyr::mutate(resid2=(Model-Tower)^2) %>% 
     dplyr::mutate(resid2=ifelse(Variable=="LAI",resid2*.025,resid2))
+	# Read in LAI and % cover
+  lai1 <- fread(paste("lai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
+  cov1 <- fread(paste("fpc_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="FPC")
+  lc <- rbind.data.frame(lai1,cov1) %>%
+	  dplyr::filter(Year==1156) %>%
+	  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+    dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+    dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+    dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site))
+  lc2 <- merge(lc, field, by=c("Site","Variable")) %>%
+    mutate(Adiff=(ARTR-sage)^2, tdiff=(Total-total)^2, b=Adiff+tdiff) %>%
+    dplyr::summarise(SS=sum(b))
   SSR <- resid %>% dplyr::summarise(SSR=sum(resid2))
-  print(round(SSR,2))
-  return (as.numeric(SSR))
+  #print(round(SSR,2))
+  return (as.numeric(SSR+lc2))
 }
 
 
-start <- c(8,3200, .7, .8,-4,10, 38,25,200) # starting values
-low <- c(6,1350, .5, .6, -5.2,7, 26.6,17.5,100) #lower bound
-up <- c(21,5220, 1, 1, -2.8,13, 49.4,32.5,300) #upper bound for ech parameter (default is inf)
+start <- c(8,3200, .7, .8,.1,10, 38,25,200) # starting values
+low <- c(6,1350, .5, .6, .05,7, 26.6,17.5,100) #lower bound
+up <- c(21,5220, 1, 1, .2,13, 49.4,32.5,300) #upper bound for ech parameter (default is inf)
 
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
                control=DEoptim.control(trace=6,  
                                        parallelType=1, packages=c("tidyr","dplyr","data.table"), 
-                                       parVar=c("df4","ins")))
+                                       parVar=c("df4","field","ins")))
 
 save.image("DE1parimage.RData")
 

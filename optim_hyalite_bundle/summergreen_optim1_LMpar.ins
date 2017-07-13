@@ -31,6 +31,8 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 outputdirectory "./"
 file_mgpp "mgpp_randomval.txt"
 file_mlai "mlai_randomval.txt"
+file_lai "lai_randomval.txt"  
+file_fpc "fpc_randomval.txt"  
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -293,14 +295,6 @@ group "shade_intolerant"
 	turnover_sap 0.1
 )
 
-group "temperate_tree"
-(
-	respcoeff 1.0
-	pstemp_min -2
-	pstemp_low 15
-	pstemp_high 25
-	pstemp_max 38
-)
 
 pft "ARTR" (
 
@@ -311,7 +305,6 @@ pft "ARTR" (
 	include 1
 	shrub				! THdiff: - has k_allom1 as 250
 	shade_intolerant
-	temperate_tree
 	k_latosa k_latosaval 		
 	rootdist rootdistval rootdist2
 	sla slaval
@@ -334,15 +327,15 @@ pft "ARTR" (
 	drought_tolerance 0.01
 	ifsage 1
 	respcoeff 1.0
-	pstemp_min pstemp_minval !-4
+	pstemp_min -4
 	pstemp_low pstemp_lowval !10 
 	pstemp_high pstemp_hival ! 25 !
 	pstemp_max pstemp_maxval ! 38 !
 	turnover_sap .1
-	est_max .2 !est_maxval
+	est_max est_maxval
 	greff_min .08 !greff_minval
 !SHRUB PARMS
-	crownarea_max 10
+	crownarea_max 2
 	turnover_root 0.7
 	ltor_max ltor_maxval
 	k_allom1 100
@@ -393,4 +386,7 @@ fireresist 0.5
 intc 0.01
 phenology "any"
 drought_tolerance 0.01
+leaflong .2
+aphenmax 75
+downramp 1
 )
