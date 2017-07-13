@@ -349,37 +349,38 @@ pft "ARTR" (
 	drought_tolerance 0.01
 	ifsage 1
 	respcoeff 1.0
-	pstemp_min pstemp_minval !-4
+	pstemp_min -4
 	pstemp_low pstemp_lowval !10 
 	pstemp_high pstemp_hival ! 25 !
 	pstemp_max pstemp_maxval ! 38 !
 	turnover_sap .1
-	est_max .2 !est_maxval
-	greff_min .08 !greff_minval
-!SHRUB PARMS
-	crownarea_max 10
-	turnover_root 0.7
+	est_max est_maxval
 	ltor_max ltor_maxval
+	greff_min .08 !greff_minval
+	phen_winter phen_winterval
+	aphenmax aphenval
+	downramp downrampval
+! from shrub:
+	turnover_root 0.7
+	crownarea_max 2 !10
 	k_allom1 100
 	k_allom2 18
 	k_allom3 1
 	k_rp 1.6
 	wooddens 332
-	cton_leaf 29 
-	cton_root 29 
-	cton_sap 330 
+	cton_leaf 29
+	cton_root 29
+	cton_sap 330
 	pathway "c3"
-	kest_repr 200 
+	kest_repr 20
 	kest_bg 0.1
 	kest_pres 1
 	litterme 0.3
-	phen_winter phen_winterval
-	aphenmax aphenval
-	downramp downrampval
+	longevity 100
 )
 
 pft "C3" (
-include 0
+include 1
 grass
 pathway "c3"
 lambda_max 0.8
@@ -411,4 +412,7 @@ fireresist 0.5
 intc 0.01
 phenology "any"
 drought_tolerance 0.01
+leaflong .2
+aphenmax 75
+downramp 1
 )
