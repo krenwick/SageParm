@@ -308,14 +308,7 @@ group "shade_intolerant"
 	turnover_sap 0.1
 )
 
-group "temperate_tree"
-(
-	respcoeff 1.0
-	pstemp_min -2
-	pstemp_low 15
-	pstemp_high 25
-	pstemp_max 38
-)
+
 
 pft "ARTR" (
 
@@ -326,7 +319,6 @@ pft "ARTR" (
 	include 1
 	shrub				! THdiff: - has k_allom1 as 250
 	shade_intolerant
-	temperate_tree
 	k_latosa k_latosaval 		
 	rootdist rootdistval rootdist2
 	sla slaval
@@ -369,7 +361,7 @@ pft "ARTR" (
 	cton_root 29 
 	cton_sap 330 
 	pathway "c3"
-	kest_repr 200 
+	kest_repr 20
 	kest_bg 0.1
 	kest_pres 1
 	litterme 0.3
