@@ -6,7 +6,6 @@ library(lhs)
 
 setwd("~/Documents/SageParm/automate_tests")
 
-# I have 12 parameters to vary
 # I want at least 10*nparm sets
 
 set.seed(1950)
@@ -29,7 +28,7 @@ Y[, 14] <- round(qunif(X[, 14], 100, 300),1) #phengdd5ramp, standard +/- 50%
 Y[, 15] <- round(qunif(X[, 15], .25, 1),2) #leaflong, range of feasible values
 
 # gsub: replaces all occurences of a pattern
-ins  <- readLines("autofit_hyalite.ins")
+ins  <- readLines("LHC.ins")
 for(i in 1:nrow(X)) {
   tx  <- gsub(pattern = "slaval", replace = Y[i,1], x = ins)
   tx  <- gsub(pattern = "k_latosaval", replace = Y[i,2], x = tx)
