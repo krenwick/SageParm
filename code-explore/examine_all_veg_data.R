@@ -25,7 +25,7 @@ basal <- read.csv("data/ReynoldsC/veg_data/2016_basalcover_by_frame.csv") %>%
 # This kinda doesn't matter since LPJ lumps all PFTs in monthly
 lai2 <- select(lai, -greenhits) %>%
   spread(growthform,lai) %>%
-  mutate(C3=forb+grass) %>%
+  mutate(C3=forb+grass, Total=shrub+C3) %>%
   select(-forb,-grass,-Frame) %>%
   group_by(Site) %>%
   select(-replicate) %>%
@@ -34,7 +34,7 @@ lai2
 
 # what percent sagebrush at each site?
 lai2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
-# wbs: .69%, .24 absolute
+# wbs: .69%, .25 absolute
 # los: .69%, .30 absolute
 # mbs: .55%, .67 absolute
 
@@ -42,7 +42,7 @@ lai2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
 head(cover)
 cover2 <- select(cover, -firsthits) %>%
   spread(growthform,canopycover) %>%
-  mutate(C3=forb+grass) %>%
+  mutate(C3=forb+grass, Total=C3+shrub) %>%
   select(-forb,-grass,-Frame) %>%
   group_by(Site) %>%
   select(-replicate) %>%
