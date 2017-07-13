@@ -22,7 +22,7 @@ vars <- c("mrh","mra","mpet","mnpp","mnee","mgpp","mevap","maet",
 # site 1: mbsec -------------------------
 mbsec <- data.frame(ID=seq(1:15)) # final # = # parameters
 for(var in vars) {
-  P1 <- RPCC(paste("ModOut/LHC/", var,".txt",sep=""), "mbsec")
+  P1 <- RPCC(paste("ModOut/Output_LHC/", var,".txt",sep=""), "mbsec")
   names(P1) <- var
   mbsec <- cbind(mbsec,P1)
 }
@@ -32,7 +32,7 @@ mbsec1 <- rownames_to_column(mbsec, "Parameter") %>% dplyr::select(-ID) %>%
 # site 2: losec -------------------------
 losec <- data.frame(ID=seq(1:15))
 for(var in vars) {
-  P1 <- RPCC(paste("ModOut/LHC/",var,".txt",sep=""), "losec")
+  P1 <- RPCC(paste("ModOut/Output_LHC/",var,".txt",sep=""), "losec")
   names(P1) <- var
   losec <- cbind(losec,P1)
 }
@@ -42,7 +42,7 @@ losec1 <- rownames_to_column(losec, "Parameter") %>% dplyr::select(-ID) %>%
 # site 3: wbsec -------------------------
 wbsec <- data.frame(ID=seq(1:15))
 for(var in vars) {
-  P1 <- RPCC(paste("ModOut/LHC/",var,".txt",sep=""), "wbsec")
+  P1 <- RPCC(paste("ModOut/Output_LHC/",var,".txt",sep=""), "wbsec")
   names(P1) <- var
   wbsec <- cbind(wbsec,P1)
 }
@@ -52,7 +52,7 @@ wbsec1 <- rownames_to_column(wbsec, "Parameter") %>% dplyr::select(-ID) %>%
 # site 4: fire -------------------------
 fire <- data.frame(ID=seq(1:15))
 for(var in vars) {
-  P1 <- RPCC(paste("ModOut/LHC/",var,".txt",sep=""), "138h08ec")
+  P1 <- RPCC(paste("ModOut/Output_LHC/",var,".txt",sep=""), "138h08ec")
   names(P1) <- var
   fire <- cbind(fire,P1)
 }
@@ -210,7 +210,7 @@ print(f4,
 seas <- c("spring","summer","fall")
 sites <- c("wbsec","losec","h08ec","mbsec")
 dat1 <- data.frame(ID=seq(1:15))
-d <- RPCCseas("ModOut/LHC/mgpp.txt")
+d <- RPCCseas("ModOut/Output_LHC/mgpp.txt")
 d %>% group_by(Lon) %>%
   summarise(mean=mean(spring))
 for(sea in seas) {
@@ -276,7 +276,7 @@ print(dat3,
 ################################################################################
 mo <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Nov","Dec")
 dat1 <- data.frame(ID=seq(1:15))
-d <- RPCCmonth("ModOut/LHC/mgpp.txt")
+d <- RPCCmonth("ModOut/Output_LHC/mgpp.txt")
 for(month in mo) {
   for(site in sites) {
     if(site=="mbsec"){lon <- -116.7486}
@@ -302,19 +302,20 @@ dat2 <- rownames_to_column(dat1, "Parameter") %>% dplyr::select(-ID) %>%
   spread(site,RPCC) %>%
   arrange(desc(mean)) %>%
   # Cut parameters where the maximum < .2
-  filter(max>=.2) %>%
+  #filter(max>=.2) %>%
   mutate_each(funs(round(.,2)),mean:Sep_wbsec) 
 
-dat2 %>% select(Parameter:max_orig)
+#dat2 %>% select(Parameter:max_orig)
 # Nope, original scale is bad idea.
 # parm can have neg impact in some months and pos in others
 dat2 %>% select(Parameter:max)
 # > .2 by meanL: sla, root_up
 # By max, add: pstemp_lo, ltor_max, pstemp_min, phengdd5, latosa.
+# New grass: sla, root_up, ltor_max, phengdd5, est_max, pstemp_max, pstemp_lo, latosa, pstemp_min
 
 # Re-do this for LAI to see if it differs:--------------------------------------
 dat1b <- data.frame(ID=seq(1:15))
-db <- RPCCmonth("ModOut/LHC/mlai.txt")
+db <- RPCCmonth("ModOut/Output_LHC/mlai.txt")
 for(month in mo) {
   for(site in sites) {
     if(site=="mbsec"){lon <- -116.7486}
@@ -340,7 +341,7 @@ dat2b <- rownames_to_column(dat1b, "Parameter") %>% dplyr::select(-ID) %>%
   spread(site,RPCC) %>%
   arrange(desc(mean)) %>%
   # Cut parameters where the maximum < .2
-  filter(max>=.2) %>%
+  #filter(max>=.2) %>%
   mutate_each(funs(round(.,2)),mean:Sep_wbsec) 
 head(dat2b)
 dat2b %>% select(Parameter:max)

@@ -85,12 +85,12 @@ RPCCnewphen <- function(data,site){
   
   # select appropriate years (1986-2015)
   b1 <- b %>% mutate(Year=Year+860) %>% 
-    filter(Year>=1986) %>%
+    filter(Year>=1986, Lon==lon) %>%
     mutate(id1=file) %>%
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","pstemp_min",
+                          "pstemp_lo","est_max",
                           "pstemp_max", "pstemp_hi",
                           "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%
@@ -196,7 +196,7 @@ RPCCseasphen <- function(data){
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","pstemp_min",
+                          "pstemp_lo","est_max",
                           "pstemp_max", "pstemp_hi",
                           "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%
@@ -232,7 +232,7 @@ RPCCmonthphen <- function(data){
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","pstemp_min",
+                          "pstemp_lo","est_max",
                           "pstemp_max", "pstemp_hi",
                           "phengdd5","phen_winter", "aphenmax","downramp"),
              sep = "_",extra="drop") %>%

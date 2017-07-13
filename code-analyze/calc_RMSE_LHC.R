@@ -16,7 +16,7 @@ df3 <- read.csv("data/RCflux_15_16.csv")
 mod <- NULL 
 vars=c("mgpp","mrh","mra","mnee","mevap","maet")
 for(var in vars) {
-  data=paste("ModOut/LHC/",var,".txt", sep="")
+  data=paste("ModOut/Output_LHC/",var,".txt", sep="")
   b <- fread(data, header=T)
   names(b)[16] <- "file"
   # select appropriate years (2014-2015)

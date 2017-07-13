@@ -140,10 +140,12 @@ flux <- ggplot(data=GPP, aes(x=Date, y=GPP)) +
   facet_wrap(~Site) +
   geom_text(data = ann_text,aes(x=Date, y=GPP,label=lab)) +
   xlab("Date") +
+  ylab(expression(GPP~(kgC~m^{-2}~month^{-1}))) +
   scale_x_date(date_breaks = "2 months",date_labels = "%b %y") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         strip.background = element_blank(),
         strip.text = element_blank(),
+        panel.grid.minor=element_blank(),
         #panel.border = element_rect(colour = "black"),
         legend.position = "top")
 flux
@@ -238,7 +240,7 @@ ggsave("figures/GPP_LAI_origpheno.pdf", plot=both,
 # Do it two ways: by site vs. all together
 ################################################################################
 # RMSE for GPP:
-GPP <- filter(all, Variable=="GPP") %>%
+GPP2 <- filter(all, Variable=="GPP") %>%
   filter(Date>="2014-10-01") %>%
   gather(Model, GPP, Evergreen:Raingreen) %>%
   select(-MODIS,-D) %>%
@@ -248,10 +250,10 @@ GPP <- filter(all, Variable=="GPP") %>%
   summarise(RMSE=sqrt(mean(SE))) %>%
   group_by(Site) %>%
   filter(RMSE==min(RMSE))
-GPP # it's summergreen except evergreen at wbsec
+GPP2 # it's summergreen except evergreen at wbsec
 
 # Same for LAI:
-LAI <- filter(all, Variable=="LAI") %>%
+LAI2 <- filter(all, Variable=="LAI") %>%
   filter(Date>="2014-10-01") %>%
   gather(Model, LAI, Evergreen:Raingreen) %>%
   select(-Tower,-D) %>%
@@ -261,7 +263,7 @@ LAI <- filter(all, Variable=="LAI") %>%
   summarise(RMSE=sqrt(mean(SE))) %>%
   group_by(Site) %>%
   filter(RMSE==min(RMSE))
-LAI # same... summergreen except at wbsec
+LAI2 # same... summergreen except at wbsec
 
 ################################################################################
 # Calculate phenology metrics based on GPP:

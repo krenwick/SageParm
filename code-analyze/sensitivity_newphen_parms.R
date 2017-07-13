@@ -78,6 +78,26 @@ a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
   dplyr::select(Parameter,mean,fire:wbsec)
 a1
 # hehe my new parms matter lots
+
+# Table 2: FPC, compare parm and rank across 4 sites
+a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+  dplyr::select(fpc,site,Parameter) %>%
+  spread(site,fpc) %>%
+  mutate_each(funs(a=abs), -Parameter) %>%
+  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+  arrange(desc(mean)) %>%
+  dplyr::select(Parameter,mean,fire:wbsec)
+a1
+
+# Table 3: LAI, compare parm and rank across 4 sites
+a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+  dplyr::select(lai,site,Parameter) %>%
+  spread(site,lai) %>%
+  mutate_each(funs(a=abs), -Parameter) %>%
+  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+  arrange(desc(mean)) %>%
+  dplyr::select(Parameter,mean,fire:wbsec)
+a1
 ################################################################################
 # Table of all parameters and average RPCC across sites and variables
 
@@ -204,12 +224,12 @@ dat2 <- rownames_to_column(dat1, "Parameter") %>% dplyr::select(-ID) %>%
   # Cut parameters where the maximum < .2
   #filter(max>=.2) %>%
   mutate_each(funs(round(.,2)),mean:Sep_wbsec) 
-dat2
+dat2 %>% select(Parameter:max)
 # Interesting! No parameter has RPCC > .2
 # Wait... with downramp, now they do???
 
 # Re-do this for LAI to see if it differs:--------------------------------------
-dat1b <- data.frame(ID=seq(1:12))
+dat1b <- data.frame(ID=seq(1:13))
 dblai <- RPCCmonthphen("ModOut/Output_LHC_newphen/mlai.txt")
 for(month in mo) {
   for(site in sites) {
@@ -222,7 +242,7 @@ for(month in mo) {
       dplyr::select(-row) %>%
       gather(Month, Value, Jan:Dec) %>%
       filter(Month==month)
-    R <- pcc(X=d1[,1:12], y=d1[,14], rank=T)
+    R <- pcc(X=d1[,1:13], y=d1[,15], rank=T)
     aa <- R$PRCC
     names(aa) <- paste(month,site,sep="_")
     dat1b <- cbind(aa,dat1b)
