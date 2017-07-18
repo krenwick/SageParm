@@ -32,12 +32,16 @@ mod <- read.csv("lai_gpp.csv") %>%
 # Merge flux with MODIS LAI
 df4 <- rbind.data.frame(mod,GPP)
 
-df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
+df4 %>% filter(Year>=2015) %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
                                                        mean=mean(Tower),max=max(Tower))
-# mean of LAI is 6.33 times higher than GPP
+df4 %>% filter(Year>=2015) %>% group_by(Variable) %>% summarise(sum=sum(Tower))
+# mean of LAI is 6.2 times higher than GPP
+# OR: 7.25!!
 
 # Read in field LAI and cover
 field <- read.csv("FieldLaiCover.csv")
+field %>% mutate(both=sage+total) %>% summarise(sum=sum(both)) # oy ve!
+# must scale these: lai, fpc, total are 1.32 time GPP
 
 # Function to run LPJ-GUESS and return vector of residuals----------------------
 # Depends on ins and flux data already existing in memory (ins and df4)
@@ -101,7 +105,7 @@ LPJG <- function(par) {
     dplyr::summarise(SS=sum(b))
   SSR <- resid %>% dplyr::summarise(SSR=sum(resid2))
   #print(round(SSR,2))
-  return (as.numeric(SSR+lc2))
+  return (as.numeric(SSR+lc2*.756))
 }
 
 
