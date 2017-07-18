@@ -83,7 +83,7 @@ ifdailynpp 1
 ifdailydecomp 1 !KE 8.19.14 changed to daily 1 from monthly 0
 ifcalcsla 0
 iffire 0 !fire on 0 fire off 1
-ifdisturb 0
+ifdisturb 1
 npatch 100
 patcharea 1000
 estinterval 5
@@ -349,7 +349,7 @@ pft "ARTR" (
 	shrub				! THdiff: - has k_allom1 as 250
 	shade_intolerant
 	boreal
-	k_latosa 5000 !1500 MRS, 6000 broadleaved global
+	k_latosa 6000 !1500 MRS, 6000 broadleaved global
 	rootdist 0.6 0.4 !0.9 0.1 MRS
 	sla 30
 	gmin 0.5
@@ -419,9 +419,9 @@ twmin_est -100
 gdd5min_est 0
 fireresist 0.5
 intc 0.01
-phenology "any"
+phenology "summergreen"
 drought_tolerance 0.01
-leaflong .2
-aphenmax 75
-downramp 1
+leaflong .5
+!aphenmax 75
+!downramp 1
 )
