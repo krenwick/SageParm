@@ -8,7 +8,7 @@ library(lhs)
 
 setwd("~/Documents/SageParm/automate_tests")
 insfile <- "LHC_newphen.ins" # name of ins file to use
-nparms <- 13
+nparms <- 14
 
 set.seed(1920)
 X <- maximinLHS(nparms*30, nparms)
@@ -18,14 +18,17 @@ Y[, 2] <- round(qunif(X[, 2], .5, 1),2) # ltor_max, exact range in global pft va
 Y[, 3] <- round(qunif(X[, 3], 0.6, 1),2) # root_upper
 Y[, 4] <- round(qunif(X[, 4], 1350, 5220),1) # k_latosa, min/max from Ganskopp 1986
 Y[, 5] <- round(qunif(X[, 5], 7, 13),1) # pstemp_low, boreal +/- 30%
-#Y[, 6] <- round(qunif(X[, 6], -5.2, -2.8 ),1) # pstemp_min, boreal +/- 30%
-Y[, 6] <- round(qunif(X[, 6], .05, .2),2) # est_max, exact range in global vals
+Y[, 6] <- round(qunif(X[, 6], -5.2, -2.8 ),1) # pstemp_min, boreal +/- 30%
+#Y[, 6] <- round(qunif(X[, 6], .05, .2),2) # est_max, exact range in global vals
 Y[, 7] <- round(qunif(X[, 7], 26.6, 49.4),1) #pstemp_max, bor/temp +/-30%
-Y[, 8] <- round(qunif(X[, 8], 17.5, 32.5),1) #pstemp_hi, bor/temp +/-30%
+#Y[, 8] <- round(qunif(X[, 8], 17.5, 32.5),1) #pstemp_hi, bor/temp +/-30%
+Y[, 8] <- round(qunif(X[, 8], 30, 240),1) #aphenmaxg, all plausible
 Y[, 9] <- round(qunif(X[, 9], 100, 300),1) #phengdd5ramp, standard +/- 50%
 Y[, 10] <- round(qunif(X[, 10], 0, 1),2) #phen_winter, all plausible
-Y[, 11] <- round(qunif(X[, 11], 30, 350),1) #aphenmax, all plausible
+Y[, 11] <- round(qunif(X[, 11], 30, 240),1) #aphenmax, all plausible
 Y[, 12] <- round(qunif(X[, 12], .05, 1),2) #downramp, all plausible
+Y[, 13] <- round(qunif(X[, 13], .05, 1),2) #downrampg, all plausible
+Y[, 14] <- round(qunif(X[, 14], 50, 150),1) #phengdd5ramp, standard +/- 50%
 
 
 # gsub: replaces all occurences of a pattern
@@ -37,19 +40,22 @@ for(i in 1:nrow(X)) {
   tx  <- gsub(pattern = "rootdist2", replace = (1-Y[i,3]), x = tx)
   tx  <- gsub(pattern = "k_latosaval", replace = Y[i,4], x = tx)
   tx  <- gsub(pattern = "pstemp_lowval", replace = Y[i,5], x = tx)
-  #tx  <- gsub(pattern = "pstemp_minval", replace = Y[i,6], x = tx)
-  tx  <- gsub(pattern = "est_maxval", replace = Y[i,6], x = tx)
+  tx  <- gsub(pattern = "pstemp_minval", replace = Y[i,6], x = tx)
+  #tx  <- gsub(pattern = "est_maxval", replace = Y[i,6], x = tx)
   tx  <- gsub(pattern = "pstemp_maxval", replace = Y[i,7], x = tx)
-  tx  <- gsub(pattern = "pstemp_hival", replace = Y[i,8], x = tx)
+  #tx  <- gsub(pattern = "pstemp_hival", replace = Y[i,8], x = tx)
+  tx  <- gsub(pattern = "apheng", replace = Y[i,8], x = tx)
   tx  <- gsub(pattern = "phengdd5rampval", replace = Y[i,9], x = tx)
   tx  <- gsub(pattern = "phen_winterval", replace = Y[i,10], x = tx)
   tx  <- gsub(pattern = "aphenval", replace = Y[i,11], x = tx)
   tx  <- gsub(pattern = "downrampval", replace = Y[i,12], x = tx)
+  tx  <- gsub(pattern = "downg", replace = Y[i,13], x = tx)
+  tx  <- gsub(pattern = "phengdd5g", replace = Y[i,14], x = tx)
 
   insname <-paste("slaa.",Y[i,1],"_ltor.",Y[i,2],"_root.",Y[i,3],"_lasa.",Y[i,4],
-                  "_pslo.",Y[i,5],"_emax.", Y[i,6],"_psma.",Y[i,7],"_pshi.",Y[i,8],
+                  "_pslo.",Y[i,5],"_psmi.", Y[i,6],"_psma.",Y[i,7],"_aphg.",Y[i,8],
                   "_pgdd.",Y[i,9],"_pwin.",Y[i,10],"_aphe.",Y[i,11],"_down.",
-                  Y[i,12], sep="")
+                  Y[i,12],"_dowg.",Y[i,13],"_pheg.",Y[i,14], sep="")
   tx  <- gsub(pattern = "outval", replace = paste(insname,".out",sep=""), x = tx)
   writeLines(tx, con=paste("ins/",insname,".ins", sep=""))
 }

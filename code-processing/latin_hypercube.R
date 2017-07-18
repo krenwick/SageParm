@@ -9,7 +9,7 @@ setwd("~/Documents/SageParm/automate_tests")
 # I want at least 10*nparm sets
 
 set.seed(1950)
-X <- maximinLHS(640, 15)
+X <- maximinLHS(640, 14)
 Y <- matrix(NA, nrow(X), ncol(X))
 Y[, 1] <- round(qunif(X[, 1], 6, 21),1) # SLA, full range from lit
 Y[, 2] <- round(qunif(X[, 2], 1350, 5220),1) # k_latosa, min/max from Ganskopp 1986
@@ -25,7 +25,6 @@ Y[, 11] <- round(qunif(X[, 11], 26.6, 49.4),1) #pstemp_max, bor/temp +/-30%
 Y[, 12] <- round(qunif(X[, 12], 17.5, 32.5),1) #pstemp_hi, bor/temp +/-30%
 Y[, 13] <- round(qunif(X[, 13], 100, 600),1) #kchill_b, 100-600 existing range in pfts
 Y[, 14] <- round(qunif(X[, 14], 100, 300),1) #phengdd5ramp, standard +/- 50%
-Y[, 15] <- round(qunif(X[, 15], .25, 1),2) #leaflong, range of feasible values
 
 # gsub: replaces all occurences of a pattern
 ins  <- readLines("LHC.ins")
@@ -45,11 +44,10 @@ for(i in 1:nrow(X)) {
   tx  <- gsub(pattern = "pstemp_hival", replace = Y[i,12], x = tx)
   tx  <- gsub(pattern = "k_chillbval", replace = Y[i,13], x = tx)
   tx  <- gsub(pattern = "phengdd5rampval", replace = Y[i,14], x = tx)
-  tx  <- gsub(pattern = "leaflongval", replace = Y[i,15], x = tx)
   insname <-paste("slaa.",Y[i,1],"_lasa.",Y[i,2],"_gmin.",Y[i,3],"_ltor.",Y[i,4],
                   "_gref.",Y[i,5],"_root.",Y[i,6],"_tsap.",Y[i,7],"_psmi.",
                   Y[i,8],"_pslo.",Y[i,9],"_estm.",Y[i,10],"_psma.",Y[i,11],
-                  "_pshi.",Y[i,12],"_chil.",Y[i,13],"_pgdd.",Y[i,14],"_llon.",Y[i,15], sep="")
+                  "_pshi.",Y[i,12],"_chil.",Y[i,13],"_pgdd.",Y[i,14], sep="")
   tx  <- gsub(pattern = "outval", replace = paste(insname,".out",sep=""), x = tx)
   writeLines(tx, con=paste("ins/",insname,".ins", sep=""))
 }

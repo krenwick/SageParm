@@ -20,7 +20,7 @@ vars <- c("mnpp","mnee","mgpp",
           "fpc","lai","anpp","cmass")
 
 # site 1: mbsec -------------------------
-mbsec <- data.frame(ID=seq(1:12)) # final # = # parameters
+mbsec <- data.frame(ID=seq(1:14)) # final # = # parameters
 for(var in vars) {
   P1 <- RPCCnewphen(paste("ModOut/Output_LHC_newphen/", var,".txt",sep=""), "mbsec")
   names(P1) <- var
@@ -30,7 +30,7 @@ mbsec1 <- rownames_to_column(mbsec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="mbsec")
 
 # site 2: losec -------------------------
-losec <- data.frame(ID=seq(1:12))
+losec <- data.frame(ID=seq(1:14))
 for(var in vars) {
   P1 <- RPCCnewphen(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "losec")
   names(P1) <- var
@@ -40,7 +40,7 @@ losec1 <- rownames_to_column(losec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="losec")
 
 # site 3: wbsec -------------------------
-wbsec <- data.frame(ID=seq(1:12))
+wbsec <- data.frame(ID=seq(1:14))
 for(var in vars) {
   P1 <- RPCCnewphen(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "wbsec")
   names(P1) <- var
@@ -50,7 +50,7 @@ wbsec1 <- rownames_to_column(wbsec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="wbsec")
 
 # site 4: fire -------------------------
-fire <- data.frame(ID=seq(1:12))
+fire <- data.frame(ID=seq(1:14))
 for(var in vars) {
   P1 <- RPCCnewphen(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "138h08ec")
   names(P1) <- var
@@ -133,7 +133,7 @@ print(t3,
 ################################################################################
 seas <- c("spring","summer","fall")
 sites <- c("wbsec","losec","h08ec","mbsec")
-dat1 <- data.frame(ID=seq(1:12))
+dat1 <- data.frame(ID=seq(1:14))
 d <- RPCCseasphen("ModOut/Output_LHC_newphen/mgpp.txt")
 d %>% group_by(Lon) %>%
   summarise(mean=mean(spring))
@@ -147,7 +147,7 @@ for(sea in seas) {
       dplyr::select(spring:sla) %>%
       gather(Season, Value, spring:fall) %>%
       filter(Season==sea)
-    R <- pcc(X=d1[,1:12], y=d1[,14], rank=T)
+    R <- pcc(X=d1[,1:14], y=d1[,16], rank=T)
     aa <- R$PRCC
     names(aa) <- paste(sea,site,sep="_")
     dat1 <- cbind(aa,dat1)
@@ -195,7 +195,7 @@ print(dat3,
 # Pull in monthly GPP and look at those
 ################################################################################
 mo <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Nov","Dec")
-dat1 <- data.frame(ID=seq(1:12))
+dat1 <- data.frame(ID=seq(1:14))
 d <- RPCCmonthphen("ModOut/Output_LHC_newphen/mgpp.txt")
 for(month in mo) {
   for(site in sites) {
@@ -208,7 +208,7 @@ for(month in mo) {
       dplyr::select(-row) %>%
       gather(Month, Value, Jan:Dec) %>%
       filter(Month==month)
-    R <- pcc(X=d1[,1:12], y=d1[,14], rank=T)
+    R <- pcc(X=d1[,1:14], y=d1[,16], rank=T)
     aa <- R$PRCC
     names(aa) <- paste(month,site,sep="_")
     dat1 <- cbind(aa,dat1)
@@ -229,7 +229,7 @@ dat2 %>% select(Parameter:max)
 # Wait... with downramp, now they do???
 
 # Re-do this for LAI to see if it differs:--------------------------------------
-dat1b <- data.frame(ID=seq(1:13))
+dat1b <- data.frame(ID=seq(1:14))
 dblai <- RPCCmonthphen("ModOut/Output_LHC_newphen/mlai.txt")
 for(month in mo) {
   for(site in sites) {
@@ -242,7 +242,7 @@ for(month in mo) {
       dplyr::select(-row) %>%
       gather(Month, Value, Jan:Dec) %>%
       filter(Month==month)
-    R <- pcc(X=d1[,1:13], y=d1[,15], rank=T)
+    R <- pcc(X=d1[,1:14], y=d1[,16], rank=T)
     aa <- R$PRCC
     names(aa) <- paste(month,site,sep="_")
     dat1b <- cbind(aa,dat1b)

@@ -36,12 +36,12 @@ RPCC <- function(data,site){
       separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                             "root_up","turnover_sap","pstemp_min",
                             "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
-                            "k_chillb","phengdd5","leaflong"),
+                            "k_chillb","phengdd5"),
                sep = "_",extra="drop") %>%
-      separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
+      separate(phengdd5, into=c("phengdd5","del"), sep=-5) %>%
       dplyr::select(-del) %>%
       mutate(row=seq(1:nrow(.))) %>%
-      gather(parameter,value, sla:leaflong) %>%
+      gather(parameter,value, sla:phengdd5) %>%
       separate(value, into=c("name","value"), sep=5, extra="drop") %>%
       dplyr::select(-name) %>%
       mutate(value=as.numeric(value)) %>%
@@ -61,7 +61,7 @@ RPCC <- function(data,site){
       dplyr::select(mean:turnover_sap)
 
   # Calculate PRCC
-  R <- pcc(X=b1[,2:16], y=b1[,1], rank=T)
+  R <- pcc(X=b1[,2:15], y=b1[,1], rank=T)
   R$PRCC
 }
 
@@ -90,14 +90,14 @@ RPCCnewphen <- function(data,site){
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","est_max",
-                          "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax","downramp"),
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "apheng", "phengdd5","phen_winter", 
+                          "aphenmax","downramp","downg", "phen5g"),
              sep = "_",extra="drop") %>%
-    separate(downramp, into=c("downramp","del"), sep=-5) %>%
+    separate(phen5g, into=c("phen5g","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:downramp) %>%
+    gather(parameter,value, sla:phen5g) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -117,7 +117,7 @@ RPCCnewphen <- function(data,site){
     dplyr::select(mean:sla)
   
   # Calculate PRCC
-  R <- pcc(X=b1[,2:13], y=b1[,1], rank=T)
+  R <- pcc(X=b1[,2:15], y=b1[,1], rank=T)
   R$PRCC
 }
 
@@ -134,12 +134,12 @@ RPCCseas <- function(data){
     separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                           "root_up","turnover_sap","pstemp_min",
                           "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
-                          "k_chillb","phengdd5","leaflong"),
+                          "k_chillb","phengdd5"),
              sep = "_",extra="drop") %>%
-    separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
+    separate(phengdd5, into=c("phengdd5","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:leaflong) %>%
+    gather(parameter,value, sla:phengdd5) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -169,12 +169,12 @@ RPCCmonth <- function(data){
     separate(file, into=c("sla","latosa","gmin","ltor_max","greff_min",
                           "root_up","turnover_sap","pstemp_min",
                           "pstemp_lo","est_max","pstemp_max", "pstemp_hi",
-                          "k_chillb","phengdd5","leaflong"),
+                          "k_chillb","phengdd5"),
              sep = "_",extra="drop") %>%
-    separate(leaflong, into=c("leaflong","del"), sep=-5) %>%
+    separate(phengdd5, into=c("phengdd5","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:leaflong) %>%
+    gather(parameter,value, sla:phengdd5) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -196,14 +196,15 @@ RPCCseasphen <- function(data){
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","est_max",
-                          "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax","downramp"),
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "apheng",
+                          "phengdd5","phen_winter", "aphenmax","downramp",
+                          "downg","phen5g"),
              sep = "_",extra="drop") %>%
-    separate(downramp, into=c("downramp","del"), sep=-5) %>%
+    separate(phen5g, into=c("phen5g","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:downramp) %>%
+    gather(parameter,value, sla:phen5g) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
@@ -232,14 +233,15 @@ RPCCmonthphen <- function(data){
     separate(id1, into=c("id","cut"), sep=27, extra="drop") %>%
     dplyr::select(-cut) %>%
     separate(file, into=c("sla","ltor_max","root_up","latosa",
-                          "pstemp_lo","est_max",
-                          "pstemp_max", "pstemp_hi",
-                          "phengdd5","phen_winter", "aphenmax","downramp"),
+                          "pstemp_lo","pstemp_min",
+                          "pstemp_max", "apheng",
+                          "phengdd5","phen_winter", "aphenmax","downramp",
+                          "downg","phen5g"),
              sep = "_",extra="drop") %>%
-    separate(downramp, into=c("downramp","del"), sep=-5) %>%
+    separate(phen5g, into=c("phen5g","del"), sep=-5) %>%
     dplyr::select(-del) %>%
     mutate(row=seq(1:nrow(.))) %>%
-    gather(parameter,value, sla:downramp) %>%
+    gather(parameter,value, sla:phen5g) %>%
     separate(value, into=c("name","value"), sep=5, extra="drop") %>%
     dplyr::select(-name) %>%
     mutate(value=as.numeric(value)) %>%
