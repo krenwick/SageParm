@@ -34,9 +34,22 @@ lai2
 
 # what percent sagebrush at each site?
 lai2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
-# wbs: .69%, .25 absolute
-# los: .69%, .30 absolute
-# mbs: .55%, .67 absolute
+# wbs: .69%, .25 absolute. Grass is 31%
+# los: .69%, .30 absolute. Grass is 31%
+# mbs: .55%, .67 absolute. Grass is 45%
+
+# get % sagebrush first then average
+lai3 <- select(lai, -greenhits) %>%
+  spread(growthform,lai) %>%
+  mutate(C3=forb+grass, Total=shrub+C3, percC3=C3/Total) %>%
+  select(-forb,-grass,-Frame) %>%
+  group_by(Site) %>%
+  select(-replicate) %>%
+  na.omit() %>%
+  summarise_each(funs(mean,sd)) 
+lai3
+lai3$Total_mean
+
 
 # Re-format the cover data:
 head(cover)
