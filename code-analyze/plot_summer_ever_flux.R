@@ -13,7 +13,7 @@ library(gridExtra)
 setwd("~/Documents/SageParm")
 
 # Set column widths for journal:
-col1 <- 80
+col1 <- 90
 col2 <- 169
 #########################################################
 # Read in flux data from 4 RC sites

@@ -98,6 +98,26 @@ a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
   arrange(desc(mean)) %>%
   dplyr::select(Parameter,mean,fire:wbsec)
 a1
+
+# Table 4: NPP, compare parm and rank across 4 sites
+a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+  dplyr::select(anpp,site,Parameter) %>%
+  spread(site,anpp) %>%
+  mutate_each(funs(a=abs), -Parameter) %>%
+  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+  arrange(desc(mean)) %>%
+  dplyr::select(Parameter,mean,fire:wbsec)
+a1
+
+# Table 5: biomass, compare parm and rank across 4 sites
+a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+  dplyr::select(cmass,site,Parameter) %>%
+  spread(site,cmass) %>%
+  mutate_each(funs(a=abs), -Parameter) %>%
+  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+  arrange(desc(mean)) %>%
+  dplyr::select(Parameter,mean,fire:wbsec)
+a1
 ################################################################################
 # Table of all parameters and average RPCC across sites and variables
 
