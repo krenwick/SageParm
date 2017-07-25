@@ -2,45 +2,45 @@ This is BibTeX, Version 0.99d (TeX Live 2015)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: JustTablesFigs.aux
 The style file: ecology.bst
-Database file #1: SageParm.bib
-You've used 1 entry,
+Database file #1: ../../bibs/SageParm.bib
+You've used 2 entries,
             2788 wiz_defined-function locations,
-            548 strings with 4023 characters,
-and the built_in function-call counts, 606 in all, are:
-= -- 53
-> -- 22
+            558 strings with 4341 characters,
+and the built_in function-call counts, 1354 in all, are:
+= -- 113
+> -- 71
 < -- 1
-+ -- 7
-- -- 6
-* -- 44
-:= -- 98
-add.period$ -- 4
-call.type$ -- 1
-change.case$ -- 6
-chr.to.int$ -- 1
-cite$ -- 1
-duplicate$ -- 41
-empty$ -- 42
-format.name$ -- 11
-if$ -- 115
++ -- 23
+- -- 21
+* -- 106
+:= -- 217
+add.period$ -- 9
+call.type$ -- 2
+change.case$ -- 15
+chr.to.int$ -- 2
+cite$ -- 2
+duplicate$ -- 91
+empty$ -- 86
+format.name$ -- 29
+if$ -- 259
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 8
-newline$ -- 13
-num.names$ -- 4
-pop$ -- 15
+missing$ -- 19
+newline$ -- 20
+num.names$ -- 8
+pop$ -- 35
 preamble$ -- 1
-purify$ -- 6
+purify$ -- 15
 quote$ -- 0
-skip$ -- 14
+skip$ -- 26
 stack$ -- 0
-substring$ -- 36
-swap$ -- 20
+substring$ -- 72
+swap$ -- 45
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 9
+type$ -- 18
 warning$ -- 0
-while$ -- 5
+while$ -- 10
 width$ -- 0
-write$ -- 20
+write$ -- 36
