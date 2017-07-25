@@ -5,6 +5,7 @@ rm(list=ls())
 library(DEoptim)
 library(dtplyr)
 library(tidyr)
+library(zoo)
 
 # SET WORKING DIRECTORY:
 setwd("./")
@@ -27,10 +28,13 @@ mod <- read.csv("lai_gpp.csv") %>%
   dplyr::select(Year,Month,Variable,Site,Tower)  
 
 # Merge flux with MODIS LAI
-df4 <- rbind.data.frame(mod,GPP)
+df4 <- rbind.data.frame(mod,GPP) #%>%
+  #dplyr::mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
+  #dplyr::mutate(Date=as.Date(D)) %>%
+ # dplyr::filter(Date>="2014-10-01"&Date<="2016-09-01")
 
-df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
-                                                       mean=mean(Tower),max=max(Tower))
+#df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
+                                                       #mean=mean(Tower),max=max(Tower))
 # mean of LAI is 6.33 times higher than GPP
 
 # Read in field LAI and cover
@@ -54,10 +58,10 @@ LPJG <- function(par) {
   tx  <- gsub(pattern = "rootdist2", replace = (1-par[4]), x = tx)
   tx  <- gsub(pattern = "phen_winterval", replace = par[5], x = tx)
   tx  <- gsub(pattern = "pstemp_lowval", replace = par[6], x = tx)
-  tx  <- gsub(pattern = "pstemp_maxval", replace = par[7], x = tx)
-  tx  <- gsub(pattern = "pstemp_hival", replace = par[8], x = tx)
+  tx  <- gsub(pattern = "pstemp_minval", replace = par[7], x = tx)
+  tx  <- gsub(pattern = "apheng", replace = par[8], x = tx)
   tx  <- gsub(pattern = "aphenval", replace = par[9], x = tx)
-  tx  <- gsub(pattern = "est_maxval", replace = par[10], x = tx)
+  tx  <- gsub(pattern = "phengdd5g", replace = par[10], x = tx)
   tx  <- gsub(pattern = "randomval", replace = random, x = tx)
   insname <- paste("./tempins",random,".ins",sep="")
   writeLines(tx, con=insname)
@@ -73,17 +77,20 @@ LPJG <- function(par) {
   mlai <- fread(paste("mlai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
   out <- rbind.data.frame(mgpp,mlai) %>%
     dplyr::mutate(Year=Year+860) %>% 
-    dplyr::filter(Year>=2015) %>%
+    dplyr::filter(Year>=2014) %>%
     tidyr::gather(Month,Model, Jan:Dec) %>%
+    dplyr::mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
+    dplyr::mutate(Date=as.Date(D)) %>%
+    dplyr::filter(Date>="2014-10-01"&Date<="2016-09-01") %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
-    dplyr::select(Year, Month,Variable,Site,Model) %>%
-    dplyr::filter(Variable!="LAI")
+    dplyr::select(Year, Month,Variable,Site,Model) #%>%
+    #dplyr::filter(Variable!="GPP")
   b <- merge(out,df4, by=c("Year","Month","Variable","Site"))
   resid <- b %>% dplyr::mutate(resid2=(Model-Tower)^2) %>% 
-    dplyr::mutate(resid2=ifelse(Variable=="LAI",resid2*.025,resid2))
+    dplyr::mutate(resid2=ifelse(Variable=="LAI",resid2*.019,resid2))
   # Read in LAI and % cover
   lai1 <- fread(paste("lai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
   cov1 <- fread(paste("fpc_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="FPC")
@@ -98,17 +105,22 @@ LPJG <- function(par) {
     dplyr::summarise(SS=sum(b))
   SSR <- resid %>% dplyr::summarise(SSR=sum(resid2))
   print(round(SSR,2))
-  return (as.numeric(SSR+lc2))
+  #return (as.numeric(SSR+lc2*.756)) # weight so annual LAI+FPC=all monthly GPP
+  #return (as.numeric(SSR+lc2*.3825)) # weight so annual LAI+FPC=1 yr of monthly GPP
+  return (as.numeric(SSR))
 }
 
-low <- c(6,1350, .5, .6, 0,7, 26.6,17.5,30,.05) #lower bound
-up <- c(21,5220, 1, 1, 1,13, 49.4,32.5,350,.2) #upper bound for ech parameter (default is inf)
+low <- c(6,1350, .5, .6, 0,7, -5.2,30,30,50) #lower bound
+up <- c(21,5220, 1, 1, 1,13,-2.8,240,240, 150) #upper bound for ech parameter (default is inf)
 
+DEoptim.control(itermax=400)
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
                control=DEoptim.control(trace=6,  
-                                       parallelType=1, packages=c("tidyr","dplyr","data.table"), 
+                                       parallelType=1, packages=c("tidyr","dplyr","data.table","zoo"), 
                                        parVar=c("df4","ins","field")))
 
-save.image("NewPhenImage.RData")
+Description <- "optimized based on monthly lai and gpp, NEW model but grass is summergreen; this time updated ps_max and phengdd5 with values from optim1"
+  
+save.image("NewPhenImage_mgl_summergrass400iter.RData")
 
 

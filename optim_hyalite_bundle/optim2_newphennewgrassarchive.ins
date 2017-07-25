@@ -312,7 +312,7 @@ pft "ARTR" (
 	phenology "summergreen"
 	leaflong 1
 	turnover_leaf 1
-	phengdd5ramp 103.9 
+	phengdd5ramp 120.2831565 
 	tcmin_surv -16.13
 	tcmin_est -9.27		
 	tcmax_est 5.81
@@ -327,12 +327,12 @@ pft "ARTR" (
 	drought_tolerance 0.01
 	ifsage 1
 	respcoeff 1.0
-	pstemp_min pstemp_minval !-4
+	pstemp_min -4
 	pstemp_low pstemp_lowval !10 
-	pstemp_high 25 !pstemp_hival ! 25 !
-	pstemp_max 39.6 !38 !pstemp_maxval ! 38 !
+	pstemp_high pstemp_hival ! 25 !
+	pstemp_max pstemp_maxval ! 38 !
 	turnover_sap .1
-	est_max .2 !est_maxval
+	est_max est_maxval
 	greff_min .08 !greff_minval
 !SHRUB PARMS
 	crownarea_max 2
@@ -353,7 +353,6 @@ pft "ARTR" (
 	litterme 0.3
 	phen_winter phen_winterval
 	aphenmax aphenval
-	downramp 1
 )
 
 pft "C3" (
@@ -379,7 +378,7 @@ pstemp_high 30
 pstemp_max 45
 sla 30
 gmin 0.5
-phengdd5ramp phengdd5g
+phengdd5ramp 100
 tcmin_surv -100
 tcmin_est -100
 tcmax_est 100
@@ -387,9 +386,9 @@ twmin_est -100
 gdd5min_est 0
 fireresist 0.5
 intc 0.01
-phenology "summergreen"
+phenology "any"
 drought_tolerance 0.01
 leaflong .5
-aphenmax apheng
+aphenmax 75
 downramp 1
 )
