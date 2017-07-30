@@ -391,6 +391,29 @@ out %>% filter(Month=="Jun") %>%
   summarise(mean=mean(LAI))
 
 # My LAI is obsurdly high! ~5 compared to means ~.2-1.25.
+################################################################################
+# Look at proportion of grass:shrub at each site
+################################################################################
+# Look at LAI- annual. Is it sage or grass?
+a1 <- fread("RCout/orig_ever_lai.out", header=T) %>%
+  mutate(Source="Evergreen")
+a2 <- fread("RCout/orig_summer_lai.out", header=T) %>%
+  mutate(Source="Summergreen")
+a3 <- fread("RCout/orig_rain_lai.out", header=T) %>%
+  mutate(Source="Raingreen")
+a4 <- rbind.data.frame(a1,a2,a3) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>2015) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
+  dplyr::mutate(percSage=ARTR/Total) %>%
+  select(Year,Source,Site,percSage) %>%
+  spread(Source,percSage)
+#select(Year,Source,Site,ARTR) %>%
+#spread(Source,ARTR)
+a4
 
 ###############################################
 # Make a plot for NEE

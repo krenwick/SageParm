@@ -12,10 +12,10 @@ library(gridExtra)
 
 # SET WORKING DIRECTORY:
 setwd("~/Documents/SageParm")
-outname1 <- "ml_summergrass1"
-outname2 <- "ml_summergrass2"
-object1 <- "HyaliteOutput/DE1parimage_ml_summergrass.RData"
-object2 <- "HyaliteOutput/NewPhenImage_ml_summergrass.RData"
+outname1 <- "mgl_summergrass1"
+outname2 <- "mgl_sg4002"
+object1 <- "HyaliteOutput/DE1parimage_monthgl_summergrass.RData"
+object2 <- "HyaliteOutput/NewPhenImage_mgl_summergrass.RData"
 
 #-------------------------------------------------------------------------------
 # Journal Specifications for figure size
@@ -131,6 +131,7 @@ lai1 <- fread(paste("Output_localruns/mlai_",outname1,".txt",sep=""), header=T) 
 load(object2)
 summary(DE1)
 DE1$optim
+DE1$member
 pars2 <- c(outname2,DE1$optim$bestmem)
 FF2 <- as.matrix(t(pars2))
 write.table(FF2, file = "figures/NewPhenParms2.csv", sep = ",", 
@@ -401,8 +402,6 @@ a3 <- rbind.data.frame(a1,a2) %>%
   dplyr::mutate(percSage=ARTR/Total) %>%
   select(Year,Source,Site,percSage) %>%
   spread(Source,percSage)
-  #select(Year,Source,Site,ARTR) %>%
-  #spread(Source,ARTR)
 a3
 
 ################################################################################
