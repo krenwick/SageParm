@@ -193,4 +193,41 @@ both <- grid.arrange(gp1,gp2,ncol=1)
 ggsave("figures/TempPrecip.pdf", plot=both,
        width = 80, height = 120, units = 'mm')
 
+################################################################################
+# Re-do figure with sizing optimized for power point
+t2 <- t + theme_set(theme_bw((base_size=16))) +
+  theme(legend.position="none", legend.title=element_blank(),
+        panel.background=element_blank(),plot.background=element_blank(),
+        #panel.grid.major=element_blank(), 
+        panel.grid.minor=element_blank(),
+        legend.text.align = 0,
+        plot.margin=unit(c(.1,.1,.1,.1), "cm"),
+        axis.title.y = element_text(size = rel(1)),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank()) +
+  ylab(expression("Temperature " ( degree*C))) 
+p2 <- p + theme_bw(base_size=16) +
+  theme(legend.position="none", legend.title=element_blank(),
+        panel.background=element_blank(),plot.background=element_blank(),
+        panel.grid.minor=element_blank(),
+        legend.text.align = 0,
+        plot.margin=unit(c(.1,.1,.1,.1), "cm"),
+        axis.title.y = element_text(size = rel(1))) +
+  ylab("Precipitation (mm)") 
+
+# Combine these into one figure:
+# first, fix annoying issue with axes not lining up
+gp1<- ggplot_gtable(ggplot_build(t2))
+gp2<- ggplot_gtable(ggplot_build(p2))
+
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+#quartz() # deal with RStudio plot crash issue that sometimes happens
+both <- grid.arrange(gp1,gp2,ncol=1)
+
+#eps doesn't support transparency, use pdf for line with CI.
+ggsave("figures/ESA_TempPrecip.pdf", plot=both,
+       width = 5, height = 6, units = 'in')
+
 
