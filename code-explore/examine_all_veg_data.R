@@ -72,7 +72,7 @@ cover2 %>% mutate(percSage=shrub_mean/(shrub_mean+C3_mean))
 lai3 <- lai %>% group_by(Site,replicate,Frame) %>%
   summarise(lai=sum(lai))
 ggplot(data=lai3, aes(x=Site,y=lai)) +
-  geom_boxplot(notch=T) 
+  geom_boxplot(notch=F) 
 
 # group by rep:
 lai4 <- lai %>% group_by(Site,replicate,Frame) %>%
