@@ -1,7 +1,7 @@
 ################################################################################
 # Plots for 2017 ESA talk
 ################################################################################
-rm(list=ls())
+rm(list=ls()) 
 library(tidyverse); theme_set(theme_bw(base_size=18))
 library(zoo)
 library(data.table)
@@ -143,7 +143,8 @@ flux <- ggplot(data=GPP, aes(x=Date, y=GPP)) +
          linetype = guide_legend(nrow = 3)) +
   theme(#legend.direction = 'horizontal', 
     legend.key = element_rect(size = 3),
-    legend.key.size = unit(1, 'lines'))
+    legend.key.size = unit(1, 'lines'),
+    axis.title.x = element_blank())
 flux
 
 # Make a plot for LAI:
@@ -181,24 +182,39 @@ lai <- ggplot(data=LAI, aes(x=Date, y=LAI)) +
          linetype = guide_legend(nrow = 3)) +
   theme(#legend.direction = 'horizontal', 
     legend.key = element_rect(size = 3),
-    legend.key.size = unit(1, 'lines'))
+    legend.key.size = unit(1, 'lines'),
+    axis.title.x = element_blank())
 lai
 
+# Fix the fucking axes
+gp1<- ggplot_gtable(ggplot_build(flux))
+gp2<- ggplot_gtable(ggplot_build(lai))
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+
+
+ggsave("figures/ESA_GPP_origpheno.pdf", plot=gp1,
+       width = 8, height = 3.1, units = 'in')
+ggsave("figures/ESA_LAI_origpheno.pdf", plot=gp2,
+       width = 8, height = 3.1, units = 'in')
+
 ################################################################################
-# Make pub-level plot including GPP + LAI
-################################################################################
+# Make plot including GPP + LAI
 gpp2 <- flux +
+  theme(axis.title.x = element_blank())
+  
+lai2 <- lai +
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())
-lai2 <- lai +
-  theme(axis.title.x = element_blank())
+  
 # first, fix annoying issue with axes not lining up
 gp1<- ggplot_gtable(ggplot_build(gpp2))
 gp2<- ggplot_gtable(ggplot_build(lai2))
 maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
 gp1$widths[2:3] <- maxWidth
 gp2$widths[2:3] <- maxWidth
-both <- grid.arrange(arrangeGrob(gp1,gp2, ncol=1,
+both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,
                                  heights = unit(c(2.6,3.0), "in")))
 
 ggsave("figures/ESA_GPP_LAI_origpheno.pdf", plot=both,
@@ -207,6 +223,45 @@ ggsave("figures/ESA_GPP_LAI_origpheno.pdf", plot=both,
 ################################################################################
 # Make plot showing just mbsec and evergreen to demonstrate pattern
 ################################################################################ 
+GPP <- filter(all, Variable=="GPP", Site=="mbsec", Year==2015) %>%
+  gather(Source, GPP, Evergreen:Tower) %>%
+  mutate(Source=factor(Source,levels=c("MODIS","Tower","Summergreen",
+                                       "Evergreen"), ordered=T)) %>%
+  filter(Source=="Tower"|Source=="Evergreen")
+
+dummy <- ggplot(data=GPP, aes(x=Date, y=GPP)) +
+  geom_line(aes(color=Source,linetype=Source), size=1) +
+  scale_linetype_manual(name="Source",
+                        breaks=c("Tower","Evergreen"),
+                        labels=c("Flux Tower","Model Output"),
+                        values=c("solid","dashed")) +
+  scale_color_manual(name="Source",
+                     breaks=c("Tower","Evergreen"),
+                     labels=c("Flux Tower","Model Output"),
+                     values=c("black","darkorchid")) +
+  facet_wrap(~Site) +
+  xlab("Month") +
+  scale_x_date(date_breaks = "1 month",date_labels = "%b") +
+  ylab(expression(GPP~(kgC~m^{-2}))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        strip.background = element_blank(),
+        strip.text = element_blank(),
+        panel.grid.minor=element_blank(),
+        legend.justification=c(0,1), legend.position=c(0.01,.99),
+        legend.title=element_blank(),
+        legend.background = element_rect(colour = NA, fill="white"),
+        legend.key = element_rect(colour = NA, fill = "white", size=.5),
+        legend.text=element_text(size=14),
+        legend.margin=margin(t=0, r=0, b=0, l=0, unit="cm")) +
+  guides(color = guide_legend(nrow = 3),
+         linetype = guide_legend(nrow = 3)) +
+  theme(#legend.direction = 'horizontal', 
+    legend.key = element_rect(size = 3),
+    legend.key.size = unit(1, 'lines'))
+dummy
+ggsave("figures/ESA_dummyplot.pdf", plot=dummy,
+       width = 10, height = 5, units = 'in')
+
 
 ################################################################################
 # Make plot showing tower, orig summergreen, and optim summergreen
@@ -280,7 +335,6 @@ GPPall <- merge(gpp1,all, by=c("Year","Month","Site","Variable")) %>%
   "Model","Model2"), ordered=T)) %>%
   filter(Source!="Evergreen") %>%
   mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"), ordered=T))
-head(GPPall)
 
 # Merge with modis data
 LAIall <- merge(lai1,all, by=c("Year","Month","Site","Variable")) %>%
@@ -323,10 +377,10 @@ opt1gpp <- ggplot(data=opt1, aes(x=Date, y=GPP)) +
          linetype = guide_legend(nrow = 2)) +
   theme(#legend.direction = 'horizontal', 
     legend.key = element_rect(size = 3),
-    legend.key.size = unit(1, 'lines'))
-opt1gpp
+    legend.key.size = unit(1, 'lines'),
+    axis.title.x = element_blank())
 
-# Make a plot for LAI:
+# Plot LAI:
 opt1l <- filter(LAIall, Source!="Model2", Year==2015, Site=="mbsec"|Site=="wbsec")
 opt1lai <- ggplot(data=opt1l, aes(x=Date, y=LAI)) +
   geom_line(aes( color=Source, linetype=Source), size=1) +
@@ -356,22 +410,36 @@ opt1lai <- ggplot(data=opt1l, aes(x=Date, y=LAI)) +
          linetype = guide_legend(nrow = 2)) +
   theme(#legend.direction = 'horizontal', 
     legend.key = element_rect(size = 3),
-    legend.key.size = unit(1, 'lines'))
+    legend.key.size = unit(1, 'lines')) +
+  theme(axis.title.x = element_blank())
 
+# Plot each individually
+# first, fix annoying issue with axes not lining up
+gp1<- ggplot_gtable(ggplot_build(opt1gpp))
+gp2<- ggplot_gtable(ggplot_build(opt1lai))
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+ggsave("figures/ESA_GPP_optim1.pdf", plot=gp1,
+       width = 8, height = 3.1, units = 'in')
+ggsave("figures/ESA_LAI_optim1.pdf", plot=gp2,
+       width = 8, height = 3.1, units = 'in')
 
 # Combine both plots into 1:
 gpp2 <- opt1gpp +
+  theme(axis.title.x = element_blank())
+
+lai2 <- opt1lai +
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())
-lai2 <- opt1lai +
-  theme(axis.title.x = element_blank())
+  
 # first, fix annoying issue with axes not lining up
 gp1<- ggplot_gtable(ggplot_build(gpp2))
 gp2<- ggplot_gtable(ggplot_build(lai2))
 maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
 gp1$widths[2:3] <- maxWidth
 gp2$widths[2:3] <- maxWidth
-both <- grid.arrange(arrangeGrob(gp1,gp2, ncol=1,
+both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,
                                  heights = unit(c(2.6,3.0), "in")))
 
 ggsave("figures/ESA_GPP_LAI_newparm.pdf", plot=both,
@@ -410,8 +478,8 @@ opt1gpp2 <- ggplot(data=opt12, aes(x=Date, y=GPP)) +
          linetype = guide_legend(nrow = 2)) +
   theme(#legend.direction = 'horizontal', 
     legend.key = element_rect(size = 3),
-    legend.key.size = unit(1, 'lines'))
-opt1gpp2
+    legend.key.size = unit(1, 'lines'),
+    axis.title.x = element_blank())
 
 # Make a plot for LAI:
 opt1l2 <- filter(LAIall, Year==2015, Site=="mbsec"|Site=="wbsec")
@@ -443,22 +511,35 @@ opt1lai2 <- ggplot(data=opt1l2, aes(x=Date, y=LAI)) +
          linetype = guide_legend(nrow = 2)) +
   theme(#legend.direction = 'horizontal', 
         legend.key = element_rect(size = 3),
-        legend.key.size = unit(1, 'lines'))
-opt1lai2
+        legend.key.size = unit(1, 'lines'),
+        axis.title.x = element_blank())
+
+# Plot each individually
+# first, fix annoying issue with axes not lining up
+gp1<- ggplot_gtable(ggplot_build(opt1gpp2))
+gp2<- ggplot_gtable(ggplot_build(opt1lai2))
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+ggsave("figures/ESA_GPP_optim2.pdf", plot=gp1,
+       width = 8, height = 3.1, units = 'in')
+ggsave("figures/ESA_LAI_optim2.pdf", plot=gp2,
+       width = 8, height = 3.1, units = 'in')
 
 # Combine both plots into 1:
 gpp2 <- opt1gpp2 +
+  theme(axis.title.x = element_blank())
+lai2 <- opt1lai2 +
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())
-lai2 <- opt1lai2 +
-  theme(axis.title.x = element_blank())
+
 # first, fix annoying issue with axes not lining up
 gp1<- ggplot_gtable(ggplot_build(gpp2))
 gp2<- ggplot_gtable(ggplot_build(lai2))
 maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
 gp1$widths[2:3] <- maxWidth
 gp2$widths[2:3] <- maxWidth
-both <- grid.arrange(arrangeGrob(gp1,gp2, ncol=1,
+both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,
                                  heights = unit(c(2.6,3.0), "in")))
 
 ggsave("figures/ESA_GPP_LAI_newphen.pdf", plot=both,
@@ -798,4 +879,88 @@ lai %>%
   group_by(Site) %>%
   summarise(lai=mean(lai))
 
+################################################################################
+# Calculate and Save Statistics: Summergreen, original parameters
+################################################################################
+GPPall <-filter(all, Variable=="GPP")
+LAIall <- filter(all, Variable=="LAI")
+# Calculate R2 for each:
+gppR2_1 <- summary(lm(Tower~Summergreen, data=GPPall))$adj.r.squared # R2 = .70, newgrass= .82
+gppR2_2 <- summary(lm(Tower~Evergreen, data=GPPall))$adj.r.squared # R2 = .72, newgrass=.85
+
+laiR2_1 <- summary(lm(MODIS~Summergreen, data=LAIall))$adj.r.squared # R2 = .14, newgrass=.64
+laiR2_2 <- summary(lm(MODIS~Evergreen, data=LAIall))$adj.r.squared # R2 = .32, newgrass=.67
+
+# calculate SSR:
+SSRgpp <- GPPall %>% mutate(M1=(Summergreen-Tower)^2, M2=(Evergreen-Tower)^2) %>%
+  na.omit() %>%
+  summarise_at(vars(M1:M2),sum)
+SSRlai <- LAIall %>% mutate(M1=(Summergreen-MODIS)^2, M2=(Evergreen-MODIS)^2) %>%
+  summarise_at(vars(M1:M2),sum)
+
+# Month where hit 20% of max GPP:
+spring <- GPPall %>% filter(Year==2015) %>% 
+  gather(Source,GPP, Evergreen:Summergreen) %>%
+  group_by(Site, Source) %>%
+  mutate(percGPP=GPP/max(GPP,na.rm=T)) %>%
+  mutate(Month=match(Month, month.abb)) %>%
+  filter(Month<=6) %>%
+  filter(percGPP>=.2) %>%
+  filter(percGPP==min(percGPP)) %>%
+  dplyr::select(Source,Site, Month) %>%
+  spread(Site,Month) 
+
+# Month of max GPP (2015):
+maxGPP <- GPPall %>% filter(Year==2015) %>%
+  gather(Source,GPP, Evergreen:Summergreen) %>%
+  group_by(Site, Source) %>%
+  filter(GPP==max(GPP,na.rm=T)) %>%
+  mutate(Month=match(Month, month.abb)) %>%
+  select(Source,Site, Month) %>%
+  spread(Site,Month) 
+
+# Month where GPP drops to 20% of max:
+fall <- GPPall %>% filter(Year==2015) %>%
+  gather(Source,GPP, Evergreen:Summergreen) %>%
+  group_by(Site, Source) %>%
+  mutate(percGPP=GPP/max(GPP,na.rm=T)) %>%
+  mutate(Month=match(Month, month.abb)) %>%
+  filter(Month>=6) %>%
+  filter(percGPP<=.2) %>%
+  filter(percGPP==max(percGPP)) %>%
+  group_by(Site,Source) %>%
+  filter(Month==min(Month)) %>% # tiebreaker
+  select(Source,Site, Month) %>%
+  spread(Site,Month) 
+
+# Calculate difference between max GPP in 2015 vs 2016
+diff <- GPPall %>% 
+  gather(Source,GPP, Evergreen:Summergreen) %>%
+  group_by(Site, Source,Year) %>%
+  filter(Year>2014) %>%
+  filter(GPP==max(GPP,na.rm=T)) %>%
+  select(Source,Site, GPP) %>%
+  spread(Year,GPP) %>%
+  mutate(diff=(`2016`-`2015`)/`2015`) %>%
+  select(Source, Site, diff) %>%
+  spread(Site,diff) 
+
+# Combine all in form where can output to spreadsheet
+# NOTE: must change to col.names=T to initialize file!!!!
+# THEN: change back to F so don't keep printing them
+row1 <- c("Summergreen", "OriginalParm",gppR2_1,laiR2_1,as.numeric(SSRgpp[1]),
+          as.numeric(SSRlai[1]), as.numeric(maxGPP[2,2:5]), as.numeric(spring[2,2:5]), 
+          as.numeric(fall[2,2:5]),as.numeric(diff[2,2:5]))
+trow1 <- as.matrix(t(row1))
+write.table(trow1, file = "figures/SumStatsOptim2.csv", sep = ",", 
+            col.names = F, row.names = F, append=2)
+
+row2 <- c("Evergreen", "OriginalParms",gppR2_2,laiR2_2,as.numeric(SSRgpp[2]),
+          as.numeric(SSRlai[2]), as.numeric(maxGPP[1,2:5]), as.numeric(spring[1,2:5]), 
+          as.numeric(fall[1,2:5]),as.numeric(diff[1,2:5]))
+trow2 <- as.matrix(t(row2))
+write.table(trow2, file = "figures/SumStatsOptim2.csv", sep = ",", 
+            col.names = F, row.names = F, append=TRUE)
+
+################################################################################
 
