@@ -29,10 +29,10 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 !                                    
 !///////////////////////////////////////////////////                      
 outputdirectory "Output_localruns/"
-file_mgpp "mgpp_ml_summergrass2.txt"
-file_mlai "mlai_ml_summergrass2.txt"
-file_lai "lai_ml_summergrass2.txt"  
-file_fpc "fpc_ml_summergrass2.txt"  
+file_mgpp "mgpp_ml_NewPhen_disturb.txt"
+file_mlai "mlai_ml_NewPhen_disturb.txt"
+file_lai "lai_ml_NewPhen_disturb.txt"  
+file_fpc "fpc_ml_NewPhen_disturb.txt"  
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -50,7 +50,7 @@ iffire 0 !fire on 0 fire off 1
 npatch 100 !KR changed from 100 to test
 patcharea 1000
 estinterval 5 ! KR changed from 5 to test sage estab module
-ifdisturb 0
+ifdisturb 1
 distinterval 100
 ifhistdisturb 0	
 ifbgestab 1
@@ -312,7 +312,7 @@ pft "ARTR" (
 	phenology "summergreen"
 	leaflong 1
 	turnover_leaf 1
-	phengdd5ramp 120.2831565 
+	phengdd5ramp 103.9 
 	tcmin_surv -16.13
 	tcmin_est -9.27		
 	tcmax_est 5.81
@@ -330,7 +330,7 @@ pft "ARTR" (
 	pstemp_min -5.18781965468079 !-4
 	pstemp_low 12.9103667470143 !10 
 	pstemp_high 25 !pstemp_hival ! 25 !
-	pstemp_max 38 !pstemp_maxval ! 38 !
+	pstemp_max 39.6 !38 !pstemp_maxval ! 38 !
 	turnover_sap .1
 	est_max .2 !est_maxval
 	greff_min .08 !greff_minval

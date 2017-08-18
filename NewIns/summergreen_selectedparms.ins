@@ -29,10 +29,10 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 !                                    
 !///////////////////////////////////////////////////                      
 outputdirectory "Output_localruns/"
-file_mgpp "mgpp_ml_summergrass1.txt"
-file_mlai "mlai_ml_summergrass1.txt"
-file_lai "lai_ml_summergrass1.txt"  
-file_fpc "fpc_ml_summergrass1.txt"  
+file_mgpp "mgpp_ml_Mod1_disturb.txt"
+file_mlai "mlai_ml_Mod1_disturb.txt"
+file_lai "lai_ml_Mod1_disturb.txt"  
+file_fpc "fpc_ml_Mod1_disturb.txt"  
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -50,7 +50,7 @@ iffire 0 !fire on 0 fire off 1
 npatch 100 !KR changed from 100 to test
 patcharea 1000
 estinterval 5 ! KR changed from 5 to test sage estab module
-ifdisturb 0
+ifdisturb 1
 distinterval 100
 ifhistdisturb 0	
 ifbgestab 1
