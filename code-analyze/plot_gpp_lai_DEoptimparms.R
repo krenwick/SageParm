@@ -12,10 +12,10 @@ library(gridExtra)
 
 # SET WORKING DIRECTORY:
 setwd("~/Documents/SageParm")
-outname1 <- "mgl_summergrass1"
-outname2 <- "mgl_sg4002"
-object1 <- "HyaliteOutput/DE1parimage_monthgl_summergrass.RData"
-object2 <- "HyaliteOutput/NewPhenImage_mgl_summergrass.RData"
+outname1 <- "ml_Mod1_disturb"
+outname2 <- "ml_NewPhen_disturb"
+object1 <- "HyaliteOutput/DE1parimage_ml_summergrass.RData"
+object2 <- "HyaliteOutput/NewPhenImage_ml_summergrass.RData"
 
 #-------------------------------------------------------------------------------
 # Journal Specifications for figure size
@@ -63,7 +63,7 @@ tx  <- gsub(pattern = "\\./", replace = "Output_localruns/", x = tx)
 writeLines(tx, con=paste("NewIns/",insname,".ins", sep=""))
 
 # Run model with new ins then compare output to flux data:
-system("/Users/poulterlab1/version-control/LPJ-GUESS/ModelFiles/modules/./guess /Users/poulterlab1/Documents/SageParm/NewIns/summergreen_selectedparms.ins")
+system("/Users/poulterlab1/Documents/SageParm/LPJfiles/OriginalModel/./guess /Users/poulterlab1/Documents/SageParm/NewIns/summergreen_selectedparms.ins")
 
 ################################################################################
 # Get baseline data on GPP, NEE, and LAI
@@ -154,7 +154,7 @@ tx  <- gsub(pattern = "aphenval", replace = DE1$optim$bestmem[9], x = tx)
 #tx  <- gsub(pattern = "pstemp_minval", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "phengdd5g", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "npatch 1", replace = "npatch 100", x = tx)
-#tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
+tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
 
 insname2 <- "optim2_newphen"
 tx  <- gsub(pattern = "randomval", replace = outname2, x = tx)
