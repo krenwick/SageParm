@@ -151,8 +151,9 @@ g1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
   mutate_each(funs(a=abs), -Parameter) %>%
   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
   arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-round(g1[,2:6],2)
+  dplyr::select(Parameter,mean,fire:wbsec) %>%
+  mutate_if(is.numeric, funs(round(.,2)))
+g1
 # SLA > root_up > ltor_max > pstemp_lo > pstemp_max
 
 ################################################################################
