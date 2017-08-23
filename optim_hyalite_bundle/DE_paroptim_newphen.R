@@ -113,9 +113,9 @@ LPJG <- function(par) {
 low <- c(6,1350, .5, .6, 0,7, -5.2,30,30,50) #lower bound
 up <- c(21,5220, 1, 1, 1,13,-2.8,240,240, 150) #upper bound for ech parameter (default is inf)
 
-DEoptim.control(itermax=400)
+#DEoptim.control(itermax=400)
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
-               control=DEoptim.control(trace=6,  
+               control=DEoptim.control(trace=6, itermax=400,  
                                        parallelType=1, packages=c("tidyr","dplyr","data.table","zoo"), 
                                        parVar=c("df4","ins","field")))
 
