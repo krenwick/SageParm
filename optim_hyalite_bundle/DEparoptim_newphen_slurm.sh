@@ -22,11 +22,11 @@
 # --mem 256000 request bigger node
 
 # These are default settings
-#SBATCH -t 12:00:00
+#SBATCH -t 14:30:00
 #SBATCH -N 1
 #SBATCH -n 32
 
-#SBATCH -p priority
+#SBATCH -p defq
 #SBATCH --no-requeue
 
 # These settings get changed by Subset script
@@ -77,7 +77,7 @@ wait
 
 ############################---------------------------------
 outdir="./Output_$jobname/"
-mv $jobdir/NewPhenImage.RData $jobdir/Output_$jobname
+mv $jobdir/*.RData $jobdir/Output_$jobname
 ############################
 
 # Copy output data to work directory
