@@ -78,7 +78,7 @@ wait
 
 ############################---------------------------------
 outdir="./Output_$jobname/"
-mv $jobdir/DE1parimage.RData $jobdir/Output_$jobname
+mv $jobdir/*.RData $jobdir/Output_$jobname
 ############################
 
 # Copy output data to work directory
