@@ -60,6 +60,111 @@ fire1 <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="fire")
 
 ################################################################################
+# Re-do all this for TOTAL, but only pulling in PFT-specific variables
+################################################################################
+# Loop through variables and calculate RPCC
+vars <- c("fpc","lai","anpp","cmass")
+
+# site 1: mbsec -------------------------
+mbsec <- data.frame(ID=seq(1:14)) # final # = # parameters
+for(var in vars) {
+  P1 <- RPCCnewphenTotal(paste("ModOut/Output_LHC_newphen/", var,".txt",sep=""), "mbsec")
+  names(P1) <- var
+  mbsec <- cbind(mbsec,P1)
+}
+mbsec1t <- rownames_to_column(mbsec, "Parameter") %>% dplyr::select(-ID) %>%
+  mutate(site="mbsec")
+
+# site 2: losec -------------------------
+losec <- data.frame(ID=seq(1:14))
+for(var in vars) {
+  P1 <- RPCCnewphenTotal(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "losec")
+  names(P1) <- var
+  losec <- cbind(losec,P1)
+}
+losec1t <- rownames_to_column(losec, "Parameter") %>% dplyr::select(-ID) %>%
+  mutate(site="losec")
+
+# site 3: wbsec -------------------------
+wbsec <- data.frame(ID=seq(1:14))
+for(var in vars) {
+  P1 <- RPCCnewphenTotal(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "wbsec")
+  names(P1) <- var
+  wbsec <- cbind(wbsec,P1)
+}
+wbsec1t <- rownames_to_column(wbsec, "Parameter") %>% dplyr::select(-ID) %>%
+  mutate(site="wbsec")
+
+# site 4: fire -------------------------
+fire <- data.frame(ID=seq(1:14))
+for(var in vars) {
+  P1 <- RPCCnewphenTotal(paste("ModOut/Output_LHC_newphen/",var,".txt",sep=""), "138h08ec")
+  names(P1) <- var
+  fire <- cbind(fire,P1)
+}
+fire1t <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>% 
+  mutate(site="fire")
+
+################################################################################
+# Merge all and prep a table
+################################################################################
+# First, merge original (sagebrush) data:
+t1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+  dplyr::select(Parameter,site,mgpp,lai,cmass) %>%
+  mutate_each(funs(a=abs),mgpp:cmass) %>%
+  group_by(Parameter) %>%
+  summarise_each(funs(mean), mgpp:cmass_a) %>%
+  mutate(mean=rowMeans(.[,5:7])) %>%
+  mutate(max=apply(.[,5:7],1,max)) %>%
+  # cut rows where max < .2
+  filter(max>=.2) %>%
+  dplyr::select(Parameter, mean,mgpp:cmass) %>%
+  arrange(desc(mean)) %>%
+  mutate_each(funs(round(.,2)),mean:cmass)
+
+# Second, merge the "total" data
+t2 <- rbind.data.frame(mbsec1t,losec1t,wbsec1t,fire1t) %>%
+  dplyr::select(Parameter,fpc,lai,anpp,cmass) %>%
+  mutate_each(funs(a=abs),fpc:cmass) %>%
+  group_by(Parameter) %>%
+  summarise_each(funs(mean), fpc:cmass_a) %>%
+  mutate(mean=rowMeans(.[,6:9])) %>%
+  mutate(max=apply(.[,6:9],1,max)) %>%
+  # cut rows where max < .2
+  #filter(max>=.2) %>%
+  dplyr::select(Parameter, lai,cmass) %>%
+  arrange(desc(abs(lai))) %>%
+  mutate_each(funs(round(.,2)),lai:cmass) %>%
+  rename(TotLAI=lai,Totcmass=cmass)
+
+t3 <- merge(t1,t2,by="Parameter") %>%
+  arrange(desc(abs(mgpp))) %>%
+  select(Parameter,mgpp,TotLAI,Totcmass,lai,cmass) %>%
+  mutate(Parameter=factor(Parameter, levels=c("apheng","phen_winter","phen5g",
+                                              "root_up","sla","pstemp_lo",
+                                              "ltor_max","latosa"),
+                          labels=c("phen\\textsubscript{max,grass}",
+                                   "phen\\textsubscript{winter}",
+                                   "GDD\\textsubscript{5,grass}",
+                                   "root\\textsubscript{up}",
+                                   "sla",
+                                   "pstemp\\textsubscript{low}",
+                                   "ltor\\textsubscript{max}",
+                                   "latosa"), ordered=T))
+t3
+
+names(t3) <- c("Parameter","GPP","LAI","MASS","LAI","MASS")
+
+t4 <- xtable(t3)
+print(t4,
+      only.contents=TRUE,
+      include.rownames=FALSE,
+      type="latex",
+      booktabs=T,
+      sanitize.text.function = identity,
+      file="figures/RPCCecosagenewphen.tex")
+
+################################################################################
 # Subset by parameters I care about:
 # Get average |RPCC| and drop parameters <.2
 # Format into pretty table ready for export (xtable, maybe try stargazer or knitr::kable)
@@ -184,18 +289,25 @@ dat2 <- rownames_to_column(dat1, "Parameter") %>% dplyr::select(-ID) %>%
   mutate_each(funs(round(.,2)),mean:summer_wbsec) %>%
   dplyr::select(Parameter,spring_wbsec,spring_losec,spring_h08ec,spring_mbsec,
                 summer_wbsec,summer_losec,summer_h08ec,summer_mbsec,
-                fall_wbsec,fall_losec,fall_h08ec,fall_mbsec)
+                fall_wbsec,fall_losec,fall_h08ec,fall_mbsec) %>%
+  ungroup() %>%
+  mutate(Parameter=factor(Parameter, levels=c("apheng","phen_winter","phen5g",
+                                              "sla","pstemp_lo","root_up","aphenmax"),
+                          labels=c("phen\\textsubscript{max,grass}",
+                                   "phen\\textsubscript{winter}",
+                                   "GDD\\textsubscript{5,grass}",
+                                   "sla",
+                                   "pstemp\\textsubscript{low}",
+                                   "root\\textsubscript{up}",
+                                   "phen\\textsubscript{max,sage}"),
+                          ordered=T))
 
 dat3 <- xtable(dat2)
 addtorow <- list()
 addtorow$pos <- list(0)
-addtorow$command <- c("Parameter & wbsec & losec & burn & mbsec &
-                      wbsec & losec & burn & mbsec &
-                      wbsec & losec & burn & mbsec \\\\") # need 4 \ to get 2 in output
-
-# "& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & 
-#                       \multicolumn{4}{c}{Fall} \\",
-# 		"\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}",
+addtorow$command <- c("Parameter & WBS & LOS & PFS & MBS &
+                      WBS & LOS & PFS & MBS &
+                      WBS & LOS & PFS & MBS \\\\") # need 4 \ to get 2 in output
 
 print(dat3,
       only.contents=TRUE,
@@ -204,7 +316,7 @@ print(dat3,
       add.to.row = addtorow,
       booktabs = TRUE,
       type="latex",
-      #digits(tbl) <- c(0,1,1,1,1,1),
+      sanitize.text.function = identity,
       file="figures/RPCC_seas_newphen.tex")
 
 ################################################################################

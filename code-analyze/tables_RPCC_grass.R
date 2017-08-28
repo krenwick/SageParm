@@ -26,7 +26,7 @@ for(var in vars) {
   names(P1) <- var
   mbsec <- cbind(mbsec,P1)
 }
-mbsec1 <- rownames_to_column(mbsec, "Parameter") %>% dplyr::select(-ID) %>%
+mbsec1g <- rownames_to_column(mbsec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="mbsec")
 
 # site 2: losec -------------------------
@@ -36,7 +36,7 @@ for(var in vars) {
   names(P1) <- var
   losec <- cbind(losec,P1)
 }
-losec1 <- rownames_to_column(losec, "Parameter") %>% dplyr::select(-ID) %>%
+losec1g <- rownames_to_column(losec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="losec")
 
 # site 3: wbsec -------------------------
@@ -46,7 +46,7 @@ for(var in vars) {
   names(P1) <- var
   wbsec <- cbind(wbsec,P1)
 }
-wbsec1 <- rownames_to_column(wbsec, "Parameter") %>% dplyr::select(-ID) %>%
+wbsec1g <- rownames_to_column(wbsec, "Parameter") %>% dplyr::select(-ID) %>%
   mutate(site="wbsec")
 
 # site 4: fire -------------------------
@@ -56,7 +56,7 @@ for(var in vars) {
   names(P1) <- var
   fire <- cbind(fire,P1)
 }
-fire1 <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>% 
+fire1g <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>% 
   mutate(site="fire")
 
 ################################################################################
@@ -68,7 +68,7 @@ fire1 <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>%
 
 #################################################
 # Table 4: FPC, compare parm and rank across 4 sites
-d1g <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+d1g <- rbind.data.frame(mbsec1g,losec1g,wbsec1g,fire1g) %>%
   dplyr::select(fpc,site,Parameter) %>%
   spread(site,fpc) %>%
   mutate_each(funs(a=abs), -Parameter) %>%
@@ -80,31 +80,29 @@ d1g
 
 #################################################
 # Table 5: LAI, compare parm and rank across 4 sites
-e1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+e1g <- rbind.data.frame(mbsec1g,losec1g,wbsec1g,fire1g) %>%
   dplyr::select(lai,site,Parameter) %>%
   spread(site,lai) %>%
   mutate_each(funs(a=abs), -Parameter) %>%
   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
   arrange(desc(mean)) %>%
   dplyr::select(Parameter,mean,fire:wbsec)
-e1
-# SLA > root_up > ltor_max > pstemp_max > pstemp_low
+e1g
 
 #################################################
 # Table 6: Cmass, compare parm and rank across 4 sites
-f1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+f1g <- rbind.data.frame(mbsec1g,losec1g,wbsec1g,fire1g) %>%
   dplyr::select(cmass,site,Parameter) %>%
   spread(site,cmass) %>%
   mutate_each(funs(a=abs), -Parameter) %>%
   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
   arrange(desc(mean)) %>%
   dplyr::select(Parameter,mean,fire:wbsec)
-f1
-# SLA > root_up > ltor_max > latosa > turnover_sap > pstemp_max
+f1g
 
 #################################################
 # Table 7: NPPsage, compare parm and rank across 4 sites
-g1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+g1g <- rbind.data.frame(mbsec1g,losec1g,wbsec1g,fire1g) %>%
   dplyr::select(anpp,site,Parameter) %>%
   spread(site,anpp) %>%
   mutate_each(funs(a=abs), -Parameter) %>%
@@ -112,7 +110,7 @@ g1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
   arrange(desc(mean)) %>%
   dplyr::select(Parameter,mean,fire:wbsec) %>%
   mutate_if(is.numeric, funs(round(.,2)))
-g1
+g1g
 # SLA > root_up > ltor_max > pstemp_lo > pstemp_max
 
 ################################################################################

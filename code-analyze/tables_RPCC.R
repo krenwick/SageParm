@@ -16,8 +16,8 @@ source("code-analyze/fxn_RPCC.R")
 # and check columns to drop in line 53
 
 # Loop through variables and calculate RPCC
-vars <- c("mrh","mra","mpet","mnpp","mnee","mgpp","mevap","maet",
-          "fpc","lai","anpp","dens","cmass")
+vars <- c("mgpp",#"mrh","mra","mpet","mnpp","mnee","mevap","maet",
+          "lai","cmass") #,"fpc","anpp","dens")
 
 # site 1: mbsec -------------------------
 mbsec <- data.frame(ID=seq(1:14)) # final # = # parameters
@@ -69,14 +69,14 @@ fire1 <- rownames_to_column(fire, "Parameter") %>% dplyr::select(-ID) %>%
 # Sage parms: fpc, lai, cmass, NPP
 #################################################
 # Table 1: NEE, compare parm and rank across 4 sites
-a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(mnee,site,Parameter) %>%
-  spread(site,mnee) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-a1
+# a1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(mnee,site,Parameter) %>%
+#   spread(site,mnee) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec)
+# a1
 # NO parameter affects NEE!
 
 #################################################
@@ -97,63 +97,63 @@ b1
 
 #################################################
 # Table 3: NPP, compare parm and rank across 4 sites
-c1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(mnpp,site,Parameter) %>%
-  spread(site,mnpp) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-c1
+# c1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(mnpp,site,Parameter) %>%
+#   spread(site,mnpp) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec)
+# c1
 # root_up > SLA > ltor_max > pstemp_lo
 
 #################################################
 # Table 4: FPC, compare parm and rank across 4 sites
-d1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(fpc,site,Parameter) %>%
-  spread(site,fpc) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-d1
+# d1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(fpc,site,Parameter) %>%
+#   spread(site,fpc) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec)
+# d1
 # SLA > root_up > ltor_max > latosa > pstemp_max
 
 #################################################
 # Table 5: LAI, compare parm and rank across 4 sites
-e1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(lai,site,Parameter) %>%
-  spread(site,lai) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-e1
+# e1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(lai,site,Parameter) %>%
+#   spread(site,lai) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec)
+# e1
 # SLA > root_up > ltor_max > pstemp_max > pstemp_low
 
 #################################################
 # Table 6: Cmass, compare parm and rank across 4 sites
-f1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(cmass,site,Parameter) %>%
-  spread(site,cmass) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec)
-f1
+# f1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(cmass,site,Parameter) %>%
+#   spread(site,cmass) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec)
+# f1
 # SLA > root_up > ltor_max > latosa > turnover_sap > pstemp_max
 
 #################################################
 # Table 7: NPPsage, compare parm and rank across 4 sites
-g1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
-  dplyr::select(anpp,site,Parameter) %>%
-  spread(site,anpp) %>%
-  mutate_each(funs(a=abs), -Parameter) %>%
-  mutate(mean=abs(rowMeans(.[,6:9]))) %>%
-  arrange(desc(mean)) %>%
-  dplyr::select(Parameter,mean,fire:wbsec) %>%
-  mutate_if(is.numeric, funs(round(.,2)))
-g1
+# g1 <- rbind.data.frame(mbsec1,losec1,wbsec1,fire1) %>%
+#   dplyr::select(anpp,site,Parameter) %>%
+#   spread(site,anpp) %>%
+#   mutate_each(funs(a=abs), -Parameter) %>%
+#   mutate(mean=abs(rowMeans(.[,6:9]))) %>%
+#   arrange(desc(mean)) %>%
+#   dplyr::select(Parameter,mean,fire:wbsec) %>%
+#   mutate_if(is.numeric, funs(round(.,2)))
+# g1
 # SLA > root_up > ltor_max > pstemp_lo > pstemp_max
 
 ################################################################################
@@ -185,25 +185,25 @@ print(t3,
 
 ################################################################################
 # Make table just for biomass
-f1
-f2 <- f1[1:5,]
-names(f2) <- c("Parameter", "mean", "burn","losec","mbsec","wbsec")
-f3 <- dplyr::select(f2, Parameter,mean,wbsec,losec,burn,mbsec) %>%
-  mutate(mean=rowMeans(.[,3:6])) %>%
-  mutate(max=apply(abs(.[,3:6]),1,max)) %>%
-  # cut rows where max < .2
-  filter(max>=.2) %>%
-  dplyr::select(-max) %>%
-  mutate_each(funs(round(.,2)),mean:mbsec)
-
-f4 <- xtable(f3)
-print(f4,
-      only.contents=TRUE,
-      include.rownames=FALSE,
-      type="latex",
-      booktabs=TRUE,
-      #digits(tbl) <- c(0,1,1,1,1,1),
-      file="figures/cmass.tex")
+# f1
+# f2 <- f1[1:5,]
+# names(f2) <- c("Parameter", "mean", "burn","losec","mbsec","wbsec")
+# f3 <- dplyr::select(f2, Parameter,mean,wbsec,losec,burn,mbsec) %>%
+#   mutate(mean=rowMeans(.[,3:6])) %>%
+#   mutate(max=apply(abs(.[,3:6]),1,max)) %>%
+#   # cut rows where max < .2
+#   filter(max>=.2) %>%
+#   dplyr::select(-max) %>%
+#   mutate_each(funs(round(.,2)),mean:mbsec)
+# 
+# f4 <- xtable(f3)
+# print(f4,
+#       only.contents=TRUE,
+#       include.rownames=FALSE,
+#       type="latex",
+#       booktabs=TRUE,
+#       #digits(tbl) <- c(0,1,1,1,1,1),
+#       file="figures/cmass.tex")
 
 ################################################################################
 # Pull in seasonal variables and look at those
@@ -241,7 +241,13 @@ dat2 <- rownames_to_column(dat1, "Parameter") %>% dplyr::select(-ID) %>%
   mutate_each(funs(round(.,2)),mean:summer_wbsec) %>%
   dplyr::select(Parameter,spring_wbsec,spring_losec,spring_h08ec,spring_mbsec,
          summer_wbsec,summer_losec,summer_h08ec,summer_mbsec,
-         fall_wbsec,fall_losec,fall_h08ec,fall_mbsec)
+         fall_wbsec,fall_losec,fall_h08ec,fall_mbsec) %>%
+  ungroup() %>%
+  mutate(Parameter=factor(Parameter, levels=c("sla","root_up","ltor_max"),
+                                    labels=c("sla",
+                                    "root\\textsubscript{up}",
+                                    "ltor\\textsubscript{max}"),
+                                    ordered=T))
 
 # Order rows differently
 #target <- c("sla","")
@@ -250,14 +256,10 @@ dat2 <- rownames_to_column(dat1, "Parameter") %>% dplyr::select(-ID) %>%
 dat3 <- xtable(dat2)
 addtorow <- list()
 addtorow$pos <- list(0)
-addtorow$command <- c("Parameter & wbsec & losec & burn & mbsec &
-                      wbsec & losec & burn & mbsec &
-                      wbsec & losec & burn & mbsec \\\\") # need 4 \ to get 2 in output
+addtorow$command <- c("Parameter & WBS & LOS & PFS & MBS &
+                      WBS & LOS & PFS & MBS &
+                      WBS & LOS & PFS & MBS \\\\") # need 4 \ to get 2 in output
 
-# "& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & 
-#                       \multicolumn{4}{c}{Fall} \\",
-# 		"\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}",
-                      
 print(dat3,
       only.contents=TRUE,
       include.rownames=FALSE,
@@ -265,7 +267,7 @@ print(dat3,
       add.to.row = addtorow,
       booktabs = TRUE,
       type="latex",
-      #digits(tbl) <- c(0,1,1,1,1,1),
+      sanitize.text.function = identity,
       file="figures/RPCC_seas.tex")
 
 ################################################################################
