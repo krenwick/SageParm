@@ -24,3 +24,5 @@ automate_tests/assim.batch.vignette_pecan.html
 automate_tests/ins/
 LPJfiles/testnewphen.ins
 LPJfiles/weather_from_stations_LPJform/
+figures/*
+Manuscript/*
