@@ -4,7 +4,8 @@
 \usepackage[]{booktabs}
 \usepackage[labelsep=period]{caption}
 \usepackage{graphicx} 
-\usepackage{tabularx}
+\usepackage{tabularx,ragged2e} % need ragged to left-allign columns
+\newcolumntype{K}{>{\RaggedLeft\arraybackslash}p{2.5em}}
 \usepackage{threeparttable} % for footnotes in table
 \usepackage[letterpaper, portrait, margin=.75in]{geometry}
 \usepackage{gensymb}
@@ -24,55 +25,25 @@
 
 \begin{table}[ht]
 	\begin{threeparttable}
-	\caption{Standard values for the parameters evaluated in the sensitivity analysis, along with the minimum and maximum values tested and reference for that range.} 
-	\begin{tabular}{lcccl}
-		\toprule
-		Parameter & Standard & Min & Max & Reference \\ 
-		\midrule
-		Specific leaf area (m\textsuperscript{2} kgC\textsuperscript{-1}) & 30 & 6 & 21 & Full range from literature\tnote1 \\
-		Leaf to sapwood area ratio & 6000 & 1350 & 5220 & min/max measured\tnote2 \\
-		Min. canopy conductance (mm s\textsuperscript{-1}) & 0.5 & 0.35 & 0.65 & standard +/- 30\% \\
-		Max. leaf to root ratio & 1 & 0.5 & 1 & full range in global PFTs \\
-		Min. growth efficiency (kgC m\textsuperscript{2} leaf\textsuperscript{-1} yr\textsuperscript{-1}) & 0.08 & 0.06 & 0.1 & standard +/- 30\% \\
-		Fraction of roots in upper .5m soil & 0.6 & 0.6 & 1 & full range in global PFTs \\
-		Sapwood turnover rate (proportion yr\textsuperscript{-1}) & 0.1 & 0.05 & 0.1 & full range in global PFTs \\
-		Max. establishment rate (individuals m\textsuperscript{-2} yr\textsuperscript{-1}) & 0.2 & 0.05 & 0.2 & full range in global PFTs \\
-		Min. temp. for photosynthesis (\celsius) & -4 & -5.2 & -2.8 & standard +/- 30 \% \\
-		Low temp. for optimal photosynthesis (\celsius) & 10 & 7 & 13 & standard +/- 30 \% \\
-		High temp. for optimal photosynthesis (\celsius) & 25 & 17.5 & 32.5 & standard +/- 30 \% \\
-		Max. temp. for photosynthesis (\celsius) & 38 & 26.6 & 49.4 & standard +/- 30 \% \\
-		k\_chillb: coefficient in budburst chilling eq. & 100 & 100 & 600 & full range in global PFTs \\
-		GDD\textsubscript{5} sum for full leaf cover & 200 & 100 & 300 & standard +/- 50\% \\
-	\bottomrule
-	\end{tabular}
-\begin{tablenotes}
-	\item[1] Minimum from \citet{Olsoy2016}; maximum from \citet{Ganskopp1986}
-	\item[2] \citet{Ganskopp1986}
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\begin{table}[ht]
-	\begin{threeparttable}
-		\caption{R2 and SSR for different models and optimization methods.} 
-		\begin{tabular}{lcccl}
+		\caption{Standard values for the parameters evaluated in the sensitivity analysis, along with the minimum and maximum values tested and reference for that range.} 
+		\begin{tabular}{llcccl}
 			\toprule
-			Parameter & Standard & Min & Max & Reference \\ 
+			Parameter & Description (units) & Standard & Min & Max & Reference \\ 
 			\midrule
-			Specific leaf area (m\textsuperscript{2} kgC\textsuperscript{-1}) & 30 & 6 & 21 & Full range from literature\tnote1 \\
-			Leaf to sapwood area ratio & 6000 & 1350 & 5220 & min/max measured\tnote2 \\
-			Min. canopy conductance (mm s\textsuperscript{-1}) & 0.5 & 0.35 & 0.65 & standard +/- 30\% \\
-			Max. leaf to root ratio & 1 & 0.5 & 1 & full range in global PFTs \\
-			Min. growth efficiency (kgC m\textsuperscript{2} leaf\textsuperscript{-1} yr\textsuperscript{-1}) & 0.08 & 0.06 & 0.1 & standard +/- 30\% \\
-			Fraction of roots in upper .5m soil & 0.6 & 0.6 & 1 & full range in global PFTs \\
-			Sapwood turnover rate (proportion yr\textsuperscript{-1}) & 0.1 & 0.05 & 0.1 & full range in global PFTs \\
-			Max. establishment rate (individuals m\textsuperscript{-2} yr\textsuperscript{-1}) & 0.2 & 0.05 & 0.2 & full range in global PFTs \\
-			Min. temp. for photosynthesis (\celsius) & -4 & -5.2 & -2.8 & standard +/- 30 \% \\
-			Low temp. for optimal photosynthesis (\celsius) & 10 & 7 & 13 & standard +/- 30 \% \\
-			High temp. for optimal photosynthesis (\celsius) & 25 & 17.5 & 32.5 & standard +/- 30 \% \\
-			Max. temp. for photosynthesis (\celsius) & 38 & 26.6 & 49.4 & standard +/- 30 \% \\
-			k\_chillb: coefficient in budburst chilling eq. & 100 & 100 & 600 & full range in global PFTs \\
-			GDD\textsubscript{5} sum for full leaf cover & 200 & 100 & 300 & standard +/- 50\% \\
+			sla & Specific leaf area (m\textsuperscript{2} kgC\textsuperscript{-1}) & 30 & 6 & 21 & Full range from literature\tnote1 \\
+			latosa & Leaf to sapwood area ratio & 6000 & 1350 & 5220 & min/max measured\tnote2 \\
+			gmin & Min. canopy conductance (mm s\textsuperscript{-1}) & 0.5 & 0.35 & 0.65 & standard +/- 30\% \\
+			ltor\textsubscript{max} & Max. leaf to root ratio & 1 & 0.5 & 1 & full range in global PFTs \\
+			greff\textsubscript{min} & Min. growth efficiency (kgC m\textsuperscript{2} leaf\textsuperscript{-1} yr\textsuperscript{-1}) & 0.08 & 0.06 & 0.1 & standard +/- 30\% \\
+			root\textsubscript{up} & Fraction of roots in upper .5m soil & 0.6 & 0.6 & 1 & full range in global PFTs \\
+			turnover\textsubscript{sap} & Sapwood turnover rate (proportion yr\textsuperscript{-1}) & 0.1 & 0.05 & 0.1 & full range in global PFTs \\
+			est\textsubscript{max} & Max. establishment rate (individuals m\textsuperscript{-2} yr\textsuperscript{-1}) & 0.2 & 0.05 & 0.2 & full range in global PFTs \\
+			pstemp\textsubscript{min} & Min. temp. for photosynthesis (\celsius) & -4 & -5.2 & -2.8 & standard +/- 30 \% \\
+			pstemp\textsubscript{low} & Low temp. for optimal photosynthesis (\celsius) & 10 & 7 & 13 & standard +/- 30 \% \\
+			pstemp\textsubscript{hi} & High temp. for optimal photosynthesis (\celsius) & 25 & 17.5 & 32.5 & standard +/- 30 \% \\
+			pstemp\textsubscript{max} & Max. temp. for photosynthesis (\celsius) & 38 & 26.6 & 49.4 & standard +/- 30 \% \\
+			k\textsubscript{chillb} & coefficient in budburst chilling eq. & 100 & 100 & 600 & full range in global PFTs \\
+			GDD\textsubscript{5} & GDD\textsubscript{5} sum for full leaf cover & 200 & 100 & 300 & standard +/- 50\% \\
 			\bottomrule
 		\end{tabular}
 		\begin{tablenotes}
@@ -82,66 +53,48 @@
 	\end{threeparttable}
 \end{table}
 
+
 \begin{table}[ht]
-	%\centering
 	\begin{threeparttable} % wraping in this makes caption the width of table
-	\caption{RPCCs for the six most influential model parameters, ranked by the mean across all output variables. Only parameters where |RPCC| > 0.2 for at least one variable are shown. Each RPCC is the mean across all four sites. Because the sign of RPCC differed among variables, we show the mean of the absolute values of RCPPs.} 
-	\begin{tabular}{lrrrrrrrr}
-		\toprule
-		% & is a stand-in for a column
-		&& \multicolumn{2}{c}{Ecosystem} & \multicolumn{4}{c}{Sagebrush} \\
-		\cmidrule(lr){3-4} \cmidrule(lr){5-8}
-		%Variable  &  \multicolumn{1}{r}{Mean}  &  \multicolumn{1}{r}{Std Dev}  &       \multicolumn{1}{r}{Mean}  &  \multicolumn{1}{r}{Std Dev}  &  \multicolumn{1}{r}{Difference}  \\
-		%\midrule
-		\input{RPCCallOuts}
-		%\bottomrule
-	\end{tabular}
-\end{threeparttable}
-\end{table}
-
-\begin{table}[ht]
-	\begin{threeparttable}
-	\caption{RPCCs for the seasonal variables at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
-	\begin{tabularx}{\textwidth}{lrrrrrrrrrrrr}
-		\toprule
-		% & is a stand-in for a column
-		& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
-		\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
-		%Parameter & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec   \\
-		%\midrule
-		\input{RPCC_seas}
-		%\bottomrule
-	\end{tabularx}
-\end{threeparttable}
-\end{table}
-
-\begin{table}[ht]
-	\begin{threeparttable}
-	\caption{RPCCs for the model parameters in the new phenology routine where |RPCC| > 0.2 for annual GPP or LAI. Each RPCC is the mean across all four sites.} 
-	\begin{tabular}{lrr}
-		\toprule
-		\input{RPCCnewphen}
-	\end{tabular}
-\end{threeparttable}
-\end{table}
-
-\begin{table}[ht]
-	\begin{threeparttable}
-		\caption{RPCCs for the seasonal variables from the new phenology routine at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
-		\begin{tabularx}{\textwidth}{lrrrrrrrrrrrr}
+		\caption{RPCCs for the six most influential model parameters, ordered based on the strength of their effect on total GPP. Only parameters where |RPCC| > 0.2 for at least one variable are shown. Each RPCC is the mean across all four sites.} 
+		\begin{tabular}{lKKKKK}
 			\toprule
 			% & is a stand-in for a column
-			& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
-			\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
-			%Parameter & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec & wbsec & losec & burn & mbsec   \\
-			%\midrule
-			\input{RPCC_seas_newphen}
-			%\bottomrule
-		\end{tabularx}
+			& \multicolumn{3}{c}{Ecosystem} & \multicolumn{2}{c}{Sagebrush} \\
+			\cmidrule(lr){2-4} \cmidrule(lr){5-6}
+			\input{RPCCecosage}
+		\end{tabular}
+	\end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	\begin{threeparttable} % wraping in this makes caption the width of table
+		\caption{RPCCs for the model parameters in the new phenology routine where |RPCC| > 0.2 for at least one variable. Each RPCC is the mean across all four sites. Parameters are ordered based on their effect on total GPP.} 
+		\begin{tabular}{lKKKKK}
+			\toprule
+			% & is a stand-in for a column
+			& \multicolumn{3}{c}{Ecosystem} & \multicolumn{2}{c}{Sagebrush} \\
+			\cmidrule(lr){2-4} \cmidrule(lr){5-6}
+			\input{RPCCecosagenewphen}
+		\end{tabular}
+	\end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	\begin{threeparttable} % wraping in this makes caption the width of table
+		\caption{$R^2$ and MAE for the original summergreen model compared to the same model with optimized parameters and the new phenology model.} 
+		\begin{tabular}{lrrrr}
+			\toprule
+			% & is a stand-in for a column
+			& \multicolumn{2}{c}{$R^2$} & \multicolumn{2}{c}{MAE} \\
+			\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+			\input{R2MAE}
+		\end{tabular}
 	\end{threeparttable}
 \end{table}
 
 \section{Figures}
+
 \begin{figure}[!htbp]
 %\centering\captionsetup{}
 \begin{measuredfigure}
@@ -154,20 +107,61 @@
 \begin{figure}[!htbp]
 	%\centering\captionsetup{}
 	\begin{measuredfigure}
-		\includegraphics[width=90mm,keepaspectratio]{TempPrecip.pdf}
-		\caption{Mean annual temperature and precipitation for the four study sites calculated from Daymet data (years 1980-2009).}
-		\label{fig:origpheno}
+		\includegraphics[width=140mm,keepaspectratio]{GPP_EC_vs_MODIS_bw.pdf}
+		\caption{Comparison of GPP estimates at each site derived from the flux towers and two variations of MODIS data: the standard MOD17 data product that uses MERRA2 gridded climate data vs. MODIS driven by micrometeorological data recorded at each site.}
+		\label{fig:modis}
 	\end{measuredfigure}
 \end{figure}
 
+\section{Supplemental Figures}
 \begin{figure}[!htbp]
 	%\centering\captionsetup{}
 	\begin{measuredfigure}
-		\includegraphics[width=140mm,keepaspectratio]{GPP_EC_vs_MODIS_bw.pdf}
-		\caption{Comparison of GPP estimates at each site derived from the flux towers and two variations of MODIS data: the standard MOD17 data product that uses MERRA2 gridded climate data vs. MODIS driven by micrometeorological data recorded at each site.}
-		\label{fig:origpheno}
+		\includegraphics[width=90mm,keepaspectratio]{TempPrecip.pdf}
+		\caption{Mean annual temperature and precipitation for the four study sites calculated from Daymet data (years 1980-2009).}
+		\label{fig:tempprecip}
 	\end{measuredfigure}
 \end{figure}
+
+
+\section{Possible Supplemental Materials}
+\begin{table}[ht]
+	\begin{threeparttable}
+		\caption{RPCCs for the seasonal variables at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
+		\begin{tabular}{lrrrrrrrrrrrr}
+			\toprule
+			% & is a stand-in for a column
+			& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
+			\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+			\input{RPCC_seas}
+		\end{tabular}
+	\end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	\begin{threeparttable}
+		\caption{RPCCs for the seasonal variables from the new phenology routine at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
+		\begin{tabular}{lrrrrrrrrrrrr}
+			\toprule
+			% & is a stand-in for a column
+			& \multicolumn{4}{c}{Spring} & \multicolumn{4}{c}{Summer} & \multicolumn{4}{c}{Fall} \\
+			\cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+			\input{RPCC_seas_newphen}
+		\end{tabular}
+	\end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	%\centering
+	\begin{threeparttable} % wraping in this makes caption the width of table
+		\caption{Original parameter values compared to parameter estimates derived from optimizing influential parameters in the original model ("Optimal Parameters") and the new phenology model ("New Phenology")} 
+		%\begin{tabularx}{.5\textwidth}{lrrr}
+		\begin{tabularx}{.5\textwidth}{p{1.6cm}*{3}{>{\centering\arraybackslash}X}}
+			\toprule
+			\input{parm_estimates}
+		\end{tabularx}
+	\end{threeparttable}
+\end{table}
 
 \section{References}
 \bibliographystyle{ecology}
