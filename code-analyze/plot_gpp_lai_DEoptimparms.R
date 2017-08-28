@@ -3,6 +3,7 @@
 # NOTE: make sure model on git is MASTER and compiled with old phenology!
 # New phenology model is in LPJfiles
 ################################################################################
+rm(list=ls())
 library(DEoptim)
 library(tidyverse); theme_set(theme_bw(base_size=10))
 library(data.table)
@@ -11,7 +12,7 @@ library(grid)
 library(gridExtra)
 
 # SET WORKING DIRECTORY:
-setwd("~/Documents/SageParm")
+setwd("~/Documents/SageParm/")
 outname1 <- "ml_Mod1_disturb"
 outname2 <- "ml_NewPhen_disturb"
 object1 <- "HyaliteOutput/DE1parimage_ml_summergrass.RData"

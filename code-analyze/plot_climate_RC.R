@@ -150,7 +150,8 @@ c2 <- ClimateD3 %>%
   mutate(Year=as.numeric(Year)) %>%
   mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"),
                      #labels=c("Wyoming big sage","Low sage","Post-fire sage","Mountain big sage"),
-                     labels=c("Wyoming","Low","Post-fire","Mountain"),
+                     #labels=c("Wyoming","Low","Post-fire","Mountain"),
+                     labels=c("WBS","LOS","PFS","MBS"),
                      ordered=T))
 # Temp:
 t <- ggplot(data=c2, aes(x=Site,y=temp, color=Site)) +
