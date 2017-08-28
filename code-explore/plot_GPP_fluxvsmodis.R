@@ -88,8 +88,8 @@ ann_text <- data.frame(Date = as.Date(c("2014-11-01","2014-11-01","2014-11-01",
                                         "2014-11-01")),
                        GPP= c(.3,.3,.3,.3),
                        Site = c("h08ec","losec","mbsec", "wbsec"),
-                       lab=c("a) Post-fire","b) Low",
-                             "c) Mountain", "d) Wyoming"))
+                       lab=c("a) PFS","b) LOS",
+                             "c) MBS", "d) WBS"))
 
 # Make clean plot for ppt and paper: first, bw for paper
 df5 <- filter(df4, Year<2016, Source!="SmithOld")
@@ -151,81 +151,7 @@ p1
 ggsave("figures/GPP_EC_vs_MODIS_bw.pdf", plot=p1,
        width = col1.5, height = 120, units = 'mm')
 
-################################################################################
-# Calculate and Save Statistics
-################################################################################
-head(df4)
-df5 <- filter(df4, Year==2015, Variable=="GPP")
-# Calculate R2 for each:
-R2gpp1 <- df5 %>% spread(Source,Value)
-gppR2_1 <- summary(lm(Tower~MODIS, data=R2gpp1))$adj.r.squared # R2 = .84
-gppR2_2 <- summary(lm(Tower~SmithNew, data=R2gpp1))$adj.r.squared # R2 = .82
 
-# calculate SSR:
-SSRgpp <- R2gpp1 %>% mutate(M1=(MODIS-Tower)^2, M2=(SmithNew-Tower)^2) %>%
-  summarise_at(vars(M1:M2),sum)
-
-# Month where hit 20% of max GPP:
-spring <- GPPall %>% filter(Year==2016) %>% 
-  group_by(Site, Source) %>%
-  mutate(percGPP=GPP/max(GPP,na.rm=T)) %>%
-  mutate(Month=match(Month, month.abb)) %>%
-  filter(Month<=6) %>%
-  filter(percGPP>=.2) %>%
-  filter(percGPP==min(percGPP)) %>%
-  dplyr::select(Source,Site, Month) %>%
-  spread(Site,Month) 
-
-# Month of max GPP (2016):
-maxGPP <- GPPall %>% filter(Year==2016) %>%
-  group_by(Site, Source) %>%
-  filter(GPP==max(GPP,na.rm=T)) %>%
-  mutate(Month=match(Month, month.abb)) %>%
-  select(Source,Site, Month) %>%
-  spread(Site,Month) 
-
-# Month where GPP drops to 20% of max:
-fall <- GPPall %>% filter(Year==2016) %>%
-  group_by(Site, Source) %>%
-  mutate(percGPP=GPP/max(GPP,na.rm=T)) %>%
-  mutate(Month=match(Month, month.abb)) %>%
-  filter(Month>=6) %>%
-  filter(percGPP>=.2) %>%
-  filter(percGPP==min(percGPP)) %>%
-  group_by(Site,Source) %>%
-  filter(Month==max(Month)) %>%
-  select(Source,Site, Month) %>%
-  spread(Site,Month) 
-
-# Calculate difference between max GPP in 2015 vs 2016
-diff <- GPPall %>% group_by(Site, Source,Year) %>%
-  filter(Year>2014) %>%
-  filter(GPP==max(GPP,na.rm=T)) %>%
-  select(Source,Site, GPP) %>%
-  spread(Year,GPP) %>%
-  mutate(diff=`2016`-`2015`) %>%
-  select(Source, Site, diff) %>%
-  spread(Site,diff) 
-
-# Combine all in form where can output to spreadsheet
-# NOTE: must change to col.names=T to initialize file!!!!
-# THEN: change back to F so don't keep printing them
-row1 <- c(outname1, "original",gppR2_1,laiR2_1,as.numeric(SSRgpp[1]),
-          as.numeric(SSRlai[1]), as.numeric(maxGPP[2,2:5]), as.numeric(spring[2,2:5]), 
-          as.numeric(fall[2,2:5]),as.numeric(diff[2,2:5]))
-trow1 <- as.matrix(t(row1))
-write.table(trow1, file = "figures/SumStatsOptim2.csv", sep = ",", 
-            col.names = F, row.names = F, append=T)
-
-row2 <- c(outname2, "NewPhen",gppR2_2,laiR2_2,as.numeric(SSRgpp[2]),
-          as.numeric(SSRlai[2]), as.numeric(maxGPP[3,2:5]), as.numeric(spring[3,2:5]), 
-          as.numeric(fall[3,2:5]),as.numeric(diff[3,2:5]))
-trow2 <- as.matrix(t(row2))
-write.table(trow2, file = "figures/SumStatsOptim2.csv", sep = ",", 
-            col.names = F, row.names = F, append=TRUE)
-
-# Check it worked:
-head(read.csv("figures/SumStatsOptim2.csv"),30)
 
 
 
