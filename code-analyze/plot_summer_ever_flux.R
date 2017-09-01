@@ -12,9 +12,11 @@ library(gridExtra)
 # Set working directory
 setwd("~/Documents/SageParm")
 
-# Set column widths for journal:
-col1 <- 90
-col2 <- 169
+# Journal Specifications for figure size
+# Agricultural and Forest Meteorology
+col1 <- 90 # 1 column width, in mm
+col1.5 <- 140
+col2 <- 190 # 2 column width, in mm
 #########################################################
 # Read in flux data from 4 RC sites
 df3 <- read.csv("data/RCflux_15_16.csv")
@@ -36,15 +38,6 @@ df4 <- merge(df3,mod,by=c("Year","Month","Variable","Site"), all=T) %>%
   mutate(Date=as.Date(Date)) %>%
   filter(Date>="2014-10-01")
 table(df4$Variable)
-
-# Plot Modis vs. flux GPP just for kicks
-ggplot(data=filter(df4,Variable=="GPP"), aes(x=Date,y=Tower)) +
-  geom_point(color="red") +
-  geom_line(color="red") +
-  geom_point(aes(x=Date,y=MODIS)) +
-  geom_line(aes(x=Date,y=MODIS)) +
-  facet_wrap(~Site)
-# Peak GPP from the tower is much higher than MODIS, except at wbsec
 
 # Pull in data from the SUMMERGREEN model runs
 summer <- NULL 
@@ -111,7 +104,9 @@ all <- merge(ever,summer, by=c("Year","Month","Variable","Site")) %>%
   mutate(Variable=replace(Variable,Variable=="mgpp","GPP")) %>%
   mutate(Variable=replace(Variable,Variable=="mnee","NEE")) %>%
   mutate(Variable=replace(Variable,Variable=="mlai","LAI")) %>%
-  merge(.,df4, by=c("Year","Month","Variable","Site"))
+  merge(.,df4, by=c("Year","Month","Variable","Site")) %>%
+  mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"),
+                     labels=c("WBS","LOS","PFS","MBS"), ordered=T))
 
 all$D <- as.yearmon(paste(all$Year, all$Month), "%Y %b")
 all$Date <- as.Date(all$D)
@@ -123,31 +118,32 @@ GPP <- filter(all, Variable=="GPP") %>%
 ann_text <- data.frame(Date = as.Date(c("2014-11-01","2014-11-01","2014-11-01",
                                         "2014-11-01")),
                        GPP= c(.24,.24,.24,.24),
-                       Site = c("h08ec","losec","mbsec", "wbsec"),
-                       lab=c("a) burn","b) los","c) mbs", "d) wbs"))
+                       Site = c("WBS","LOS","PFS", "MBS"),
+                       lab=c("a) WBS","b) LOS","c) PFS", "d) MBS"))
   
 flux <- ggplot(data=GPP, aes(x=Date, y=GPP)) +
   #geom_point(aes(color=Source)) +
   geom_line(aes(color=Source,linetype=Source)) +
   scale_linetype_manual(name="Source",
                         breaks=c("Evergreen","Raingreen","Summergreen","Tower"),
-                        labels=c("Evergreen","Raingreen","Summergreen","Tower"),
+                        labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
                         values=c("dashed", "dashed","dashed","solid"))+
   scale_color_manual(name="Source",
                      breaks=c("Evergreen","Raingreen","Summergreen","Tower"),
-                     labels=c("Evergreen","Raingreen","Summergreen","Tower"),
+                     labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
                      values=c("darkcyan","deepskyblue","purple","black")) +
-  facet_wrap(~Site) +
-  geom_text(data = ann_text,aes(x=Date, y=GPP,label=lab)) +
+  facet_wrap(~Site, ncol=4) +
+  #geom_text(data = ann_text,aes(x=Date, y=GPP,label=lab)) +
   xlab("Date") +
   ylab(expression(GPP~(kgC~m^{-2}~month^{-1}))) +
-  scale_x_date(date_breaks = "2 months",date_labels = "%b %y") +
+  scale_x_date(date_breaks = "3 months",date_labels = "%b %y") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         strip.background = element_blank(),
         strip.text = element_blank(),
         panel.grid.minor=element_blank(),
         #panel.border = element_rect(colour = "black"),
-        legend.position = "top")
+        legend.position = "top",
+        panel.grid.major = element_line(size=0.2))
 flux
 
 ggsave("figures/GPP_ever_summer_flux.pdf", plot=flux,
@@ -163,30 +159,33 @@ LAI <- filter(all, Variable=="LAI") %>%
 ann_text <- data.frame(Date = as.Date(c("2014-11-01","2014-11-01","2014-11-01",
                                         "2014-11-01")),
                        LAI = c(5,5,5,5),
-                       Site = c("h08ec","losec","mbsec", "wbsec"),
-                       lab=c("e) burn","f) los","g) mbs", "h) wbs"))
+                       Site = c("WBS","LOS","PFS", "MBS"),
+                       lab=c("a) WBS","b) LOS","c) PFS", "d) MBS"))
+
 lai <- ggplot(data=LAI, aes(x=Date, y=LAI)) +
   #geom_point(aes( color=Source)) +
   geom_line(aes( color=Source, linetype=Source)) +
   scale_linetype_manual(name="Source",
                         breaks=c("Evergreen","Raingreen","Summergreen","MODIS"),
-                        labels=c("Evergreen","Raingreen","Summergreen","MODIS"),
+                        labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
                         values=c("dashed", "dashed","dashed","solid"))+
   scale_color_manual(name="Source",
                      breaks=c("Evergreen","Raingreen","Summergreen","MODIS"),
-                     labels=c("Evergreen","Raingreen","Summergreen","MODIS"),
+                     labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
                      values=c("darkcyan","deepskyblue","purple","black")) +
-  geom_text(data = ann_text,aes(x=Date, y=LAI,label=lab)) +
-  facet_wrap(~Site) +
+  #geom_text(data = ann_text,aes(x=Date, y=LAI,label=lab)) +
+  facet_wrap(~Site, ncol=4) +
   xlab("Month") +
   ylab("Leaf Area Index") +
-  scale_x_date(date_breaks = "2 months",date_labels = "%b %y") +
+  scale_x_date(date_breaks = "3 months",date_labels = "%b %y") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
               strip.background = element_blank(),
-              strip.text = element_blank(),
+              #strip.text = element_blank(),
               panel.grid.minor = element_blank(),
              # panel.border = element_rect(colour = "black"),
-        legend.position = "top")
+        legend.position = "top",
+        legend.margin=margin(t=0, r=0, b=-.3, l=0, unit="cm"),
+        panel.grid.major = element_line(size=0.2))
 lai
 
 ggsave("figures/LAI_ever_summer_modis.pdf", plot=lai,
@@ -196,20 +195,42 @@ ggsave("figures/LAI_ever_summer_modis.pdf", plot=lai,
 # Make pub-level plot including GPP + LAI
 ################################################################################
 gpp2 <- flux +
+  theme(legend.position = "none")
+lai2 <- lai +
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())
-lai2 <- lai +
-  theme(legend.position = "none")
+  
 # first, fix annoying issue with axes not lining up
 gp1<- ggplot_gtable(ggplot_build(gpp2))
 gp2<- ggplot_gtable(ggplot_build(lai2))
 maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
 gp1$widths[2:3] <- maxWidth
 gp2$widths[2:3] <- maxWidth
-both <- grid.arrange(arrangeGrob(gp1,gp2, ncol=1,heights = unit(c(90,90), "mm")))
+both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,heights = unit(c(60,60), "mm")))
 
 ggsave("figures/GPP_LAI_origpheno.pdf", plot=both,
-       width = col2, height = col2, units = 'mm')
+       width = col2, height = 120, units = 'mm')
+
+################################################################################
+# Re-do this plot in black and white for print
+################################################################################
+printsafe <- c('#a6cee3','#1f78b4','#b2df8a','black')
+gpp3 <- gpp2 + scale_color_manual(values=printsafe)
+lai3 <- lai2 + scale_color_manual(name="Source",
+                breaks=c("Evergreen","Raingreen","Summergreen","MODIS"),
+                labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
+                values=printsafe)
+
+# first, fix annoying issue with axes not lining up
+gp1<- ggplot_gtable(ggplot_build(gpp3))
+gp2<- ggplot_gtable(ggplot_build(lai3))
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,heights = unit(c(60,60), "mm")))
+
+ggsave("figures/GPP_LAI_origpheno_printsafe.pdf", plot=both,
+       width = col2, height = 120, units = 'mm')
 
 ################################################################################
 # Calculate RMSE for GPP and LAI for each model run.

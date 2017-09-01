@@ -13,10 +13,10 @@ library(gridExtra)
 
 # SET WORKING DIRECTORY:
 setwd("~/Documents/SageParm/")
-outname1 <- "ml_Mod1_disturb"
-outname2 <- "ml_NewPhen_disturb"
-object1 <- "HyaliteOutput/DE1parimage_ml_summergrass.RData"
-object2 <- "HyaliteOutput/NewPhenImage_ml_summergrass.RData"
+outname1 <- "ml_Mod1_newcostmean1000"
+outname2 <- "ml_NewPhen_newcostmean1000"
+object1 <- "HyaliteOutput/DE1parimage_ml_Mod1_newcostmean1000.RData"
+object2 <- "HyaliteOutput/NewPhenImage_ml_newcostmean1000.RData"
 
 #-------------------------------------------------------------------------------
 # Journal Specifications for figure size
@@ -36,7 +36,7 @@ FF <- as.matrix(t(pars1))
 write.table(FF, file = "figures/Optim1Parms2.csv", sep = ",", 
             col.names = F, row.names = F, append=T)
 
-
+plot(DE1, plot.type = "bestvalit", type = 'b', col = 'blue')
 ########################
 # Extract parameter values and plot results
 DE1$optim$bestmem[1]
@@ -57,7 +57,7 @@ tx  <- gsub(pattern = "pstemp_maxval", replace = DE1$optim$bestmem[7], x = tx)
 #tx  <- gsub(pattern = "pstemp_hival", replace = DE1$optim$bestmem[8], x = tx)
 tx  <- gsub(pattern = "phengdd5rampval", replace = DE1$optim$bestmem[8], x = tx)
 tx  <- gsub(pattern = "npatch 1", replace = "npatch 100", x = tx)
-tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
+#tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
 insname <- "summergreen_selectedparms"
 tx  <- gsub(pattern = "randomval", replace = outname1, x = tx)
 tx  <- gsub(pattern = "\\./", replace = "Output_localruns/", x = tx)
@@ -133,6 +133,7 @@ load(object2)
 summary(DE1)
 DE1$optim
 DE1$member
+plot(DE1, plot.type = "bestvalit", type = 'b', col = 'blue')
 pars2 <- c(outname2,DE1$optim$bestmem)
 FF2 <- as.matrix(t(pars2))
 write.table(FF2, file = "figures/NewPhenParms2.csv", sep = ",", 
@@ -155,7 +156,7 @@ tx  <- gsub(pattern = "aphenval", replace = DE1$optim$bestmem[9], x = tx)
 #tx  <- gsub(pattern = "pstemp_minval", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "phengdd5g", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "npatch 1", replace = "npatch 100", x = tx)
-tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
+#tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
 
 insname2 <- "optim2_newphen"
 tx  <- gsub(pattern = "randomval", replace = outname2, x = tx)
@@ -339,7 +340,7 @@ maxGPP <- GPPall %>% filter(Year==2015) %>%
   group_by(Site, Source) %>%
   filter(GPP==max(GPP,na.rm=T)) %>%
   mutate(Month=match(Month, month.abb)) %>%
-  select(Source,Site, Month) %>%
+  dplyr::select(Source,Site, Month) %>%
   spread(Site,Month) 
 
 # Month where GPP drops to 20% of max:
@@ -352,17 +353,18 @@ fall <- GPPall %>% filter(Year==2015) %>%
   filter(percGPP==max(percGPP)) %>%
   group_by(Site,Source) %>%
   filter(Month==min(Month)) %>% # tiebreaker
-  select(Source,Site, Month) %>%
+  dplyr::select(Source,Site, Month) %>%
   spread(Site,Month) 
 
 # Calculate difference between max GPP in 2015 vs 2016
 diff <- GPPall %>% group_by(Site, Source,Year) %>%
   filter(Year>2014) %>%
   filter(GPP==max(GPP,na.rm=T)) %>%
-  select(Source,Site, GPP) %>%
+  distinct(Year, Site, GPP,.keep_all = TRUE) %>% # tiebreaker
+  dplyr::select(Source,Site, GPP) %>%
   spread(Year,GPP) %>%
   mutate(diff=(`2016`-`2015`)/`2015`) %>%
-  select(Source, Site, diff) %>%
+  dplyr::select(Source, Site, diff) %>%
   spread(Site,diff) 
 
 # Combine all in form where can output to spreadsheet
@@ -383,7 +385,7 @@ write.table(trow2, file = "figures/SumStatsOptim2.csv", sep = ",",
             col.names = F, row.names = F, append=TRUE)
 
 # Check it worked:
-head(read.csv("figures/SumStatsOptim2.csv"),30)
+tail(read.csv("figures/SumStatsOptim2.csv"))
 
 
 
