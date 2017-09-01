@@ -12,6 +12,12 @@
 \usepackage{textcomp}
 \usepackage[section]{placeins}
 \usepackage[round]{natbib}
+\newcommand{\beginsupplement}{%
+	\setcounter{table}{0}
+	\renewcommand{\thetable}{S\arabic{table}}%
+	\setcounter{figure}{0}
+	\renewcommand{\thefigure}{S\arabic{figure}}%
+}
 %\addbibresource{SageParm.bib}
 %\captionsetup[table]
 
@@ -83,12 +89,12 @@
 \begin{table}[ht]
 	\begin{threeparttable} % wraping in this makes caption the width of table
 		\caption{$R^2$ and MAE for the original summergreen model compared to the same model with optimized parameters and the new phenology model.} 
-		\begin{tabular}{lrrrr}
+		\begin{tabular}{llrrrr}
 			\toprule
 			% & is a stand-in for a column
-			& \multicolumn{2}{c}{$R^2$} & \multicolumn{2}{c}{MAE} \\
-			\cmidrule(lr){2-3} \cmidrule(lr){4-5}
-			\input{R2MAE}
+			&& \multicolumn{2}{c}{$R^2$} & \multicolumn{2}{c}{MAE} \\
+			\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+			\input{R2MAE2}
 		\end{tabular}
 	\end{threeparttable}
 \end{table}
@@ -98,9 +104,18 @@
 \begin{figure}[!htbp]
 %\centering\captionsetup{}
 \begin{measuredfigure}
-	\includegraphics[width=\linewidth]{GPP_LAI_origpheno.pdf}
-	\caption{Modeled GPP (a-d) and LAI (e-h) compared to GPP measured at flux sites and LAI derived from MODIS data. Panels represent different sites. The black lines represent the reference data while the colored lines represent model output derived using standard parameters and each of the three phenology types available in LPJ-GUESS.}
+	\includegraphics[width=\linewidth]{GPP_LAI_origpheno_printsafe.pdf}
+	\caption{Modeled LAI (a-d) and GPP (e-h) compared to LAI derived from MODIS data and GPP measured at flux sites. Panels represent different sites. The black lines represent the reference data while the colored lines represent model output from simulations using the standard parameters and each of the three phenology types available in LPJ-GUESS.}
 	\label{fig:origpheno}
+	\end{measuredfigure}
+\end{figure}
+
+\begin{figure}[!htbp]
+	%\centering\captionsetup{}
+	\begin{measuredfigure}
+		\includegraphics[width=\linewidth]{GPP_LAI_newmods.pdf}
+		\caption{Modeled LAI (a-d) and GPP (e-h) compared to LAI derived from MODIS data and GPP measured at flux sites. Panels represent different sites. The black lines represent the reference data while the colored lines represent model output from simulations using the standard parameters with the summergreen phenology type, optimized parameters, or new phenology routine.}
+		\label{fig:newphen}
 	\end{measuredfigure}
 \end{figure}
 
@@ -113,7 +128,8 @@
 	\end{measuredfigure}
 \end{figure}
 
-\section{Supplemental Figures}
+\beginsupplement
+\section{Supplemental Materials}
 \begin{figure}[!htbp]
 	%\centering\captionsetup{}
 	\begin{measuredfigure}
@@ -123,8 +139,6 @@
 	\end{measuredfigure}
 \end{figure}
 
-
-\section{Possible Supplemental Materials}
 \begin{table}[ht]
 	\begin{threeparttable}
 		\caption{RPCCs for the seasonal variables at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
