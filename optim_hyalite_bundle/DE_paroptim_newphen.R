@@ -10,6 +10,9 @@ library(zoo)
 # SET WORKING DIRECTORY:
 setwd("./")
 
+# to test on home laptop:
+#setwd("~/Documents/SageParm/optim_hyalite_bundle")
+
 # Read in monthly GPP data
 GPP <- read.csv("RCflux_15_16.csv") %>%
   dplyr::filter(Variable=="GPP")
@@ -28,14 +31,17 @@ mod <- read.csv("lai_gpp.csv") %>%
   dplyr::select(Year,Month,Variable,Site,Tower)  
 
 # Merge flux with MODIS LAI
-df4 <- rbind.data.frame(mod,GPP) #%>%
-  #dplyr::mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
-  #dplyr::mutate(Date=as.Date(D)) %>%
- # dplyr::filter(Date>="2014-10-01"&Date<="2016-09-01")
+df4 <- rbind.data.frame(mod,GPP)
 
-#df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
-                                                       #mean=mean(Tower),max=max(Tower))
-# mean of LAI is 6.33 times higher than GPP
+df4 %>% dplyr::group_by(Variable) %>% dplyr::summarise(min=min(Tower),
+                                                       mean=mean(Tower),max=max(Tower))
+
+df4 %>% dplyr::mutate(D = as.yearmon(paste(Year, Month), "%Y %b")) %>%
+  dplyr::mutate(Date=as.Date(D)) %>%
+  dplyr::filter(Date>="2014-10-01"&Date<="2016-09-01") %>%
+  dplyr::group_by(Variable) %>%
+  dplyr::summarise(Total=sum(Tower),mean=mean(Tower))
+# mean of LAI is 6.2 times higher than GPP
 
 # Read in field LAI and cover
 field <- read.csv("FieldLaiCover.csv")
@@ -86,28 +92,40 @@ LPJG <- function(par) {
     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
     dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) %>%
-    dplyr::select(Year, Month,Variable,Site,Model) #%>%
-    #dplyr::filter(Variable!="GPP")
+    dplyr::select(Year, Month,Variable,Site,Model) 
   b <- merge(out,df4, by=c("Year","Month","Variable","Site"))
-  resid <- b %>% dplyr::mutate(resid2=(Model-Tower)^2) %>% 
-    dplyr::mutate(resid2=ifelse(Variable=="LAI",resid2*.019,resid2))
-  # Read in LAI and % cover
-  lai1 <- fread(paste("lai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
-  cov1 <- fread(paste("fpc_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="FPC")
-  lc <- rbind.data.frame(lai1,cov1) %>%
-    dplyr::filter(Year==1156) %>%
-    dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
-    dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
-    dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
-    dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site))
-  lc2 <- merge(lc, field, by=c("Site","Variable")) %>%
-    mutate(Adiff=(ARTR-sage)^2, tdiff=(Total-total)^2, b=Adiff+tdiff) %>%
-    dplyr::summarise(SS=sum(b))
-  SSR <- resid %>% dplyr::summarise(SSR=sum(resid2))
-  print(round(SSR,2))
+  # resid <- b %>% dplyr::mutate(resid1=(Model-Tower)) %>% 
+  #   dplyr::mutate(resid1=ifelse(Variable=="LAI",resid1*.019,resid2))
+# NEW COST FXN:
+  resid <- b %>% dplyr::mutate(resid1=abs((Model-Tower))) %>% 
+    dplyr::group_by(Site,Variable) %>%
+    dplyr::summarise(sumresid=sum(resid1), meanresid=mean(resid1), 
+             # meandata=mean(Tower)) %>%
+             meandata=sum(Tower)) %>%
+    dplyr::mutate(CV=sumresid/meandata) %>%
+    dplyr::group_by(Site) %>%
+    dplyr::summarise(Sum=sum(CV)) %>%
+    dplyr::ungroup() %>%
+    dplyr::summarise(cost=sum(Sum)/length(unique(b$Site)))
+	# Read in LAI and % cover
+#   lai1 <- fread(paste("lai_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="LAI")
+#   cov1 <- fread(paste("fpc_",random,".txt",sep=""), header=T) %>% dplyr::mutate(Variable="FPC")
+#   lc <- rbind.data.frame(lai1,cov1) %>%
+# 	  dplyr::filter(Year==1156) %>%
+# 	  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+#     dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+#     dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+#     dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site))
+#   lc2 <- merge(lc, field, by=c("Site","Variable")) %>%
+#     mutate(Adiff=(ARTR-sage)^2, tdiff=(Total-total)^2, b=Adiff+tdiff) %>%
+#     dplyr::summarise(SS=sum(b))
+  #SSR <- resid %>% dplyr::summarise(SSR=sum(resid2))
+  #print(round(SSR,2))
   #return (as.numeric(SSR+lc2*.756)) # weight so annual LAI+FPC=all monthly GPP
   #return (as.numeric(SSR+lc2*.3825)) # weight so annual LAI+FPC=1 yr of monthly GPP
-  return (as.numeric(SSR))
+  #return (as.numeric(SSR))
+  # NEW cost function- from Hufkens et al. 2016
+  return(as.numeric(resid$cost))
 }
 
 low <- c(6,1350, .5, .6, 0,7, -5.2,30,30,50) #lower bound
@@ -115,12 +133,12 @@ up <- c(21,5220, 1, 1, 1,13,-2.8,240,240, 150) #upper bound for ech parameter (d
 
 #DEoptim.control(itermax=400)
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
-               control=DEoptim.control(trace=6, itermax=400,  
+               control=DEoptim.control(trace=6, itermax=200,  
                                        parallelType=1, packages=c("tidyr","dplyr","data.table","zoo"), 
-                                       parVar=c("df4","ins","field")))
+                                       parVar=c("df4","field","ins")))
 
-Description <- "optimized based on monthly lai and gpp, NEW model but grass is summergreen; this time updated ps_max and phengdd5 with values from optim1"
+Description <- "optimized based on monthly lai and gpp, NEW model and NEW cost fxn"
   
-save.image("NewPhenImage_mgl_summergrass400iter.RData")
+save.image("NewPhenImage_mgl_newcost.RData")
 
 
