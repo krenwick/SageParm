@@ -138,13 +138,18 @@ field <- merge(field1,lai4, by="Site") %>%
   select(-replicate) %>%
   group_by(Site,Date,Source) %>%
   summarise(LAI=mean(lai))
+field
+
+# Alternative: read in correctly calculated values from Pat
+LAI <- c(.38,1.19,.58)
+field$LAI <- LAI
 both <- merge(m3,field,by=c("Date","Source","Site","LAI"),all=T)
 
 # Plot them both together to verify quality of MODIS:
 ggplot(data=both, aes(x=Date,y=LAI, color=Source)) +
   geom_point() +
   geom_line() +
-  geom_smooth() +
+  #geom_smooth() +
   facet_wrap(~Site)
 # YES! I feel good about using MODIS
 
