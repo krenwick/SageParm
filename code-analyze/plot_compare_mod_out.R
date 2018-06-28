@@ -183,7 +183,8 @@ GPPall <- merge(gpp1,all, by=c("Year","Month","Site","Variable")) %>%
   mutate(Source=factor(Source, levels=c("Tower","Summergreen","Evergreen",
                                         "Model","Model2"), ordered=T)) %>%
   filter(Source!="Evergreen") %>%
-  mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"), ordered=T))
+  mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"),
+                     labels=c("WBS","LOS","PFS","MBS"), ordered=T))
 
 # Merge with modis data
 LAIall <- merge(lai1,all, by=c("Year","Month","Site","Variable")) %>%
@@ -193,11 +194,12 @@ LAIall <- merge(lai1,all, by=c("Year","Month","Site","Variable")) %>%
   mutate(Source=factor(Source, levels=c("MODIS","Summergreen","Evergreen",
                                         "Model","Model2"), ordered=T)) %>%
   filter(Source!="Evergreen") %>%
-  mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"), ordered=T))
+  mutate(Site=factor(Site, levels=c("wbsec","losec","h08ec","mbsec"),
+                     labels=c("WBS","LOS","PFS","MBS"), ordered=T))
 
 ################################################################################
 # Plot GPP:
-opt12 <- filter(GPPall, Year==2015, Site=="mbsec"|Site=="wbsec")
+opt12 <- filter(GPPall, Year==2015, Site=="MBS"|Site=="WBS")
 opt1gpp2 <- ggplot(data=opt12, aes(x=Date, y=GPP)) +
   geom_line(aes(color=Source,linetype=Source), size=1) +
   scale_linetype_manual(name="Source",
@@ -230,7 +232,7 @@ opt1gpp2 <- ggplot(data=opt12, aes(x=Date, y=GPP)) +
     axis.title.x = element_blank())
 
 # Make a plot for LAI:
-opt1l2 <- filter(LAIall, Year==2015, Site=="mbsec"|Site=="wbsec")
+opt1l2 <- filter(LAIall, Year==2015, Site=="MBS"|Site=="WBS")
 opt1lai2 <- ggplot(data=opt1l2, aes(x=Date, y=LAI)) +
   geom_line(aes( color=Source, linetype=Source), size=1) +
   scale_linetype_manual(name="Source",
@@ -394,3 +396,74 @@ both <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,heights = unit(c(60,60), "mm"))
 
 ggsave("figures/GPP_LAI_newmods_printsafe.pdf", plot=both,
        width = col2, height = 120, units = 'mm')
+
+################################################################################
+# Create XY plot (model vs. reference) as requested by reviewer 2
+################################################################################
+# GPP first
+GPP2 <- spread(GPP, Source, GPP) %>%
+  gather(Model,GPP, Summergreen:Model2)
+head(GPP2)
+
+gppxy <- ggplot(GPP2, aes(x=Tower,y=GPP, color=Model)) +
+  geom_point(size=.5) +
+  geom_abline(intercept=0,slope=1) +
+  scale_color_manual(name="Source",
+              breaks=c("Summergreen","Model","Model2"),
+              labels=c("Original Model","Optimal Parameters","New Phenology"),
+              values=c("darkcyan","deepskyblue","purple")) +
+  theme(panel.grid.minor = element_blank(),
+        # panel.border = element_rect(colour = "black"),
+        legend.position = "top",
+        legend.margin=margin(t=0, r=0, b=-.3, l=0, unit="cm"),
+        panel.grid.major = element_line(size=0.2),
+        strip.background = element_blank(),
+        strip.text = element_blank()) +
+  xlim(0,.25) +
+  ylim(0,.25) +
+  facet_wrap(~Site, ncol=4) +
+  ylab("Model Output (GPP)") +
+  xlab("Reference Data") +
+  coord_equal(ratio=1)
+gppxy
+
+LAI2 <- spread(LAI, Source, LAI) %>%
+  gather(Model,LAI, Summergreen:Model2)
+laixy <- ggplot(LAI2, aes(x=MODIS,y=LAI, color=Model)) +
+  geom_point(size=.5) +
+  geom_abline(intercept=0,slope=1) +
+  scale_color_manual(name="Source",
+                     breaks=c("Summergreen","Model","Model2"),
+                     labels=c("Original Model","Optimal Parameters","New Phenology"),
+                     values=c("darkcyan","deepskyblue","purple")) +
+  theme(panel.grid.minor = element_blank(),
+        # panel.border = element_rect(colour = "black"),
+        legend.position = "top",
+        legend.margin=margin(t=0, r=0, b=-.3, l=0, unit="cm"),
+        panel.grid.major = element_line(size=0.2),
+        strip.background = element_blank()) +
+  xlim(0,3.8) +
+  ylim(0,3.8) +
+  facet_wrap(~Site, ncol=4) +
+  ylab("Model Output (LAI)") +
+  xlab("Reference Data (LAI)") +
+  coord_equal(ratio=1)
+
+# Combine plots into one figure-------------------------------------------------
+gppxy2 <- gppxy +
+  theme(legend.position = "none") 
+laixy2 <- laixy +
+  theme(#axis.text.x = element_blank(),
+        axis.title.x = element_blank())
+
+# first, fix annoying issue with axes not lining up
+gp1<- ggplot_gtable(ggplot_build(gppxy2))
+gp2<- ggplot_gtable(ggplot_build(laixy2))
+maxWidth = unit.pmax(gp1$widths[2:3], gp2$widths[2:3])
+gp1$widths[2:3] <- maxWidth
+gp2$widths[2:3] <- maxWidth
+bothxy <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,heights = unit(c(61,59), "mm")))
+
+ggsave("figures/GPP_LAI_newmods_xy.pdf", plot=bothxy,
+       width = col2, height = 120, units = 'mm')
+
