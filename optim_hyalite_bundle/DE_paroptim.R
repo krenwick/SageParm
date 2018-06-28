@@ -132,7 +132,7 @@ low <- c(6,1350, .5, .6, -5.2,7, 26.6,100) #lower bound
 up <- c(21,5220, 1, 1, -2.8,13, 49.4,300) #upper bound for ech parameter (default is inf)
 
 DE1 <- DEoptim(lower=low,upper=up,fn=LPJG, 
-               control=DEoptim.control(trace=6,  
+               control=DEoptim.control(itermax = 1000, trace=50, steptol=100,
                                        parallelType=1, packages=c("tidyr","dplyr","data.table","zoo"), 
                                        parVar=c("df4","field","ins")))
 
