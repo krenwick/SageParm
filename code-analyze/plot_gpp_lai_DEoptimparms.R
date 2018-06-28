@@ -13,9 +13,9 @@ library(gridExtra)
 
 # SET WORKING DIRECTORY:
 setwd("~/Documents/SageParm/")
-outname1 <- "ml_Mod1_newcostmean1000"
-outname2 <- "ml_NewPhen_newcostmean1000"
-object1 <- "HyaliteOutput/DE1parimage_ml_Mod1_newcostmean1000.RData"
+outname1 <- "ml_Mod1_newcostmean1000_disturb"
+outname2 <- "ml_NewPhen_newcostmean1000_disturb"
+object1 <- "HyaliteOutput/DE1parimage_mgl_Mod1_newcostmean1000.RData"
 object2 <- "HyaliteOutput/NewPhenImage_ml_newcostmean1000.RData"
 
 #-------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ tx  <- gsub(pattern = "pstemp_maxval", replace = DE1$optim$bestmem[7], x = tx)
 #tx  <- gsub(pattern = "pstemp_hival", replace = DE1$optim$bestmem[8], x = tx)
 tx  <- gsub(pattern = "phengdd5rampval", replace = DE1$optim$bestmem[8], x = tx)
 tx  <- gsub(pattern = "npatch 1", replace = "npatch 100", x = tx)
-#tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
+tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
 insname <- "summergreen_selectedparms"
 tx  <- gsub(pattern = "randomval", replace = outname1, x = tx)
 tx  <- gsub(pattern = "\\./", replace = "Output_localruns/", x = tx)
@@ -156,7 +156,7 @@ tx  <- gsub(pattern = "aphenval", replace = DE1$optim$bestmem[9], x = tx)
 #tx  <- gsub(pattern = "pstemp_minval", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "phengdd5g", replace = DE1$optim$bestmem[10], x = tx)
 tx  <- gsub(pattern = "npatch 1", replace = "npatch 100", x = tx)
-#tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
+tx  <- gsub(pattern = "ifdisturb 0", replace = "ifdisturb 1", x = tx)
 
 insname2 <- "optim2_newphen"
 tx  <- gsub(pattern = "randomval", replace = outname2, x = tx)
