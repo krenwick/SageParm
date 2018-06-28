@@ -59,7 +59,6 @@
 	\end{threeparttable}
 \end{table}
 
-
 \begin{table}[ht]
 	\begin{threeparttable} % wraping in this makes caption the width of table
 		\caption{RPCCs for the six most influential model parameters, ordered based on the strength of their effect on total GPP. Only parameters where |RPCC| > 0.2 for at least one variable are shown. Each RPCC is the mean across all four sites.} 
@@ -95,6 +94,20 @@
 			&& \multicolumn{2}{c}{$R^2$} & \multicolumn{2}{c}{MAE} \\
 			\cmidrule(lr){3-4} \cmidrule(lr){5-6}
 			\input{R2MAE2}
+			\bottomrule
+		\end{tabular}
+	\end{threeparttable}
+\end{table}
+
+\begin{table}[ht]
+	\begin{threeparttable} % wraping in this makes caption the width of table
+		\caption{Proportion of total LAI at each site that was classified as shrub either in the field data or output from different model runs.} 
+		\begin{tabular}{lrrrr}
+			\toprule
+			% & is a stand-in for a column
+			%&& \multicolumn{2}{c}{$R^2$} & \multicolumn{2}{c}{MAE} \\
+			%\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+			\input{perclai}
 		\end{tabular}
 	\end{threeparttable}
 \end{table}
@@ -119,26 +132,8 @@
 	\end{measuredfigure}
 \end{figure}
 
-\begin{figure}[!htbp]
-	%\centering\captionsetup{}
-	\begin{measuredfigure}
-		\includegraphics[width=140mm,keepaspectratio]{GPP_EC_vs_MODIS_bw.pdf}
-		\caption{Comparison of GPP estimates at each site derived from the flux towers and two variations of MODIS data: the standard MOD17 data product that uses MERRA2 gridded climate data vs. MODIS driven by micrometeorological data recorded at each site.}
-		\label{fig:modis}
-	\end{measuredfigure}
-\end{figure}
-
 \beginsupplement
 \section{Supplemental Materials}
-\begin{figure}[!htbp]
-	%\centering\captionsetup{}
-	\begin{measuredfigure}
-		\includegraphics[width=90mm,keepaspectratio]{TempPrecip.pdf}
-		\caption{Mean annual temperature and precipitation for the four study sites calculated from Daymet data (years 1980-2009).}
-		\label{fig:tempprecip}
-	\end{measuredfigure}
-\end{figure}
-
 \begin{table}[ht]
 	\begin{threeparttable}
 		\caption{RPCCs for the seasonal variables at each site. Seasonal variables represent the proportion of annual GPP that occurs in each season. Only parameters where |RPCC| > 0.2 for at least one site and season are shown.} 
@@ -166,7 +161,6 @@
 \end{table}
 
 \begin{table}[ht]
-	%\centering
 	\begin{threeparttable} % wraping in this makes caption the width of table
 		\caption{Original parameter values compared to parameter estimates derived from optimizing influential parameters in the original model ("Optimal Parameters") and the new phenology model ("New Phenology")} 
 		%\begin{tabularx}{.5\textwidth}{lrrr}
@@ -176,6 +170,24 @@
 		\end{tabularx}
 	\end{threeparttable}
 \end{table}
+
+\begin{figure}[ht]
+	%\centering\captionsetup{}
+	\begin{measuredfigure}
+		\includegraphics[width=90mm,keepaspectratio]{TempPrecip.pdf}
+		\caption{Mean annual temperature and precipitation for the four study sites calculated from Daymet data (years 1980-2009).}
+		\label{fig:tempprecip}
+	\end{measuredfigure}
+\end{figure}
+
+\begin{figure}[ht]
+	%\centering\captionsetup{}
+	\begin{measuredfigure}
+		\includegraphics[width=140mm,keepaspectratio]{GPP_EC_vs_MODIS_bw.pdf}
+		\caption{Comparison of GPP estimates at each site derived from the flux towers and two variations of MODIS data: the standard MOD17 data product that uses MERRA2 gridded climate data vs. MODIS driven by micrometeorological data recorded at each site.}
+		\label{fig:modis}
+	\end{measuredfigure}
+\end{figure}
 
 \section{References}
 \bibliographystyle{ecology}
