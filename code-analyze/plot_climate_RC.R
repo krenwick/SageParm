@@ -132,7 +132,7 @@ ggplot(data=ClimateD32, aes(x=Month,y=ppt, color=Site)) +
   geom_point() +
   geom_line() +
   scale_color_manual(values=colors) +
-  ylab("Precipitation (mm)") +
+  ylab("Precipitation (cm)") +
   theme_bw(base_size=12) +
   scale_x_continuous(breaks=seq(1:12)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
@@ -171,7 +171,7 @@ t <- ggplot(data=c2, aes(x=Site,y=temp, color=Site)) +
 p<- ggplot(data=c2, aes(x=Site,y=ppt, color=Site)) +
   geom_boxplot() +
   scale_color_manual(values=colors) +
-  ylab("Mean Annual Precipitation (mm)") +
+  ylab("Mean Annual Precipitation (cm)") +
   theme(legend.position="none", legend.title=element_blank(),
         panel.background=element_blank(),plot.background=element_blank(),
         panel.grid.minor=element_blank(),
