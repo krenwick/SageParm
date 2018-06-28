@@ -50,6 +50,9 @@ all <- merge(pars1,pars2,by="parms",all=T) %>%
   dplyr::select(Parameter,Original=orig,`Optimal Parameters`=Estimate,`New Phenology`=Estimate2)
 all
 
+# Add original value for GDD5 grass:
+all[11,2] <- 100
+
 # pretty table
 digits <- matrix
 t <- xtable(all, digits=1)
