@@ -29,10 +29,10 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 !                                    
 !///////////////////////////////////////////////////                      
 outputdirectory "Output_localruns/"
-file_mgpp "mgpp_ml_NewPhen_disturb.txt"
-file_mlai "mlai_ml_NewPhen_disturb.txt"
-file_lai "lai_ml_NewPhen_disturb.txt"  
-file_fpc "fpc_ml_NewPhen_disturb.txt"  
+file_mgpp "mgpp_ml_NewPhen_newcostmean1000.txt"
+file_mlai "mlai_ml_NewPhen_newcostmean1000.txt"
+file_lai "lai_ml_NewPhen_newcostmean1000.txt"  
+file_fpc "fpc_ml_NewPhen_newcostmean1000.txt"  
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -50,7 +50,7 @@ iffire 0 !fire on 0 fire off 1
 npatch 100 !KR changed from 100 to test
 patcharea 1000
 estinterval 5 ! KR changed from 5 to test sage estab module
-ifdisturb 1
+ifdisturb 0
 distinterval 100
 ifhistdisturb 0	
 ifbgestab 1
@@ -305,9 +305,9 @@ pft "ARTR" (
 	include 1
 	shrub				! THdiff: - has k_allom1 as 250
 	shade_intolerant
-	k_latosa 1441.41344250981 		
-	rootdist 0.967709698429012 0.0322903015709878
-	sla 12.2646564574853
+	k_latosa 1793.83212819112 		
+	rootdist 0.942926500295973 0.0570734997040269
+	sla 9.34676426409298
 	gmin .5 !gminval
 	phenology "summergreen"
 	leaflong 1
@@ -327,8 +327,8 @@ pft "ARTR" (
 	drought_tolerance 0.01
 	ifsage 1
 	respcoeff 1.0
-	pstemp_min -5.18781965468079 !-4
-	pstemp_low 12.9103667470143 !10 
+	pstemp_min -5.17283477370675 !-4
+	pstemp_low 8.2054130528835 !10 
 	pstemp_high 25 !pstemp_hival ! 25 !
 	pstemp_max 39.6 !38 !pstemp_maxval ! 38 !
 	turnover_sap .1
@@ -337,7 +337,7 @@ pft "ARTR" (
 !SHRUB PARMS
 	crownarea_max 2
 	turnover_root 0.7
-	ltor_max 0.838486778659774
+	ltor_max 0.972729943708127
 	k_allom1 100
 	k_allom2 18
 	k_allom3 1
@@ -351,8 +351,8 @@ pft "ARTR" (
 	kest_bg 0.1
 	kest_pres 1
 	litterme 0.3
-	phen_winter 0.330984245432335
-	aphenmax 167.207159498718
+	phen_winter 0.340435580359993
+	aphenmax 166.088978107956
 	downramp 1
 )
 
@@ -379,7 +379,7 @@ pstemp_high 30
 pstemp_max 45
 sla 30
 gmin 0.5
-phengdd5ramp 133.820720884257
+phengdd5ramp 85.7889898634087
 tcmin_surv -100
 tcmin_est -100
 tcmax_est 100
@@ -390,6 +390,6 @@ intc 0.01
 phenology "summergreen"
 drought_tolerance 0.01
 leaflong .5
-aphenmax 44.9951096166836
+aphenmax 44.7847081917067
 downramp 1
 )

@@ -29,10 +29,10 @@ param "file_gridlist" (str "RC4/RC_grid4.txt")
 !                                    
 !///////////////////////////////////////////////////                      
 outputdirectory "Output_localruns/"
-file_mgpp "mgpp_ml_Mod1_disturb.txt"
-file_mlai "mlai_ml_Mod1_disturb.txt"
-file_lai "lai_ml_Mod1_disturb.txt"  
-file_fpc "fpc_ml_Mod1_disturb.txt"  
+file_mgpp "mgpp_ml_Mod1_newcostmean1000.txt"
+file_mlai "mlai_ml_Mod1_newcostmean1000.txt"
+file_lai "lai_ml_Mod1_newcostmean1000.txt"  
+file_fpc "fpc_ml_Mod1_newcostmean1000.txt"  
 
 !///////////////////////////////////////////////////    
 !///////////////////////////////////////////////////             
@@ -50,7 +50,7 @@ iffire 0 !fire on 0 fire off 1
 npatch 100 !KR changed from 100 to test
 patcharea 1000
 estinterval 5 ! KR changed from 5 to test sage estab module
-ifdisturb 1
+ifdisturb 0
 distinterval 100
 ifhistdisturb 0	
 ifbgestab 1
@@ -305,14 +305,14 @@ pft "ARTR" (
 	include 1
 	shrub				! THdiff: - has k_allom1 as 250
 	shade_intolerant
-	k_latosa 2644.99937959092 		
-	rootdist 0.606629537175272 0.393370462824728
-	sla 20.9131270888511
+	k_latosa 3828.74746885164 		
+	rootdist 0.618766246944924 0.381233753055076
+	sla 18.5540230339933
 	gmin .5 !gminval
 	phenology "summergreen"
 	leaflong 1
 	turnover_leaf 1
-	phengdd5ramp 119.330042685941
+	phengdd5ramp 101.25992055051
 	tcmin_surv -16.13
 	tcmin_est -9.27		
 	tcmax_est 5.81
@@ -327,17 +327,17 @@ pft "ARTR" (
 	drought_tolerance 0.01
 	ifsage 1
 	respcoeff 1.0
-	pstemp_min -3.0119195756191 !-4
-	pstemp_low 10.2959001312077 !10 
+	pstemp_min -4.64404143281281 !-4
+	pstemp_low 12.7806678625042 !10 
 	pstemp_high 25 !pstemp_hival ! 25 !
-	pstemp_max 47.3872109085321 ! 38 !
+	pstemp_max 36.9493787285872 ! 38 !
 	turnover_sap .1
 	est_max .2 !est_maxval
 	greff_min .08 !greff_minval
 !SHRUB PARMS
 	crownarea_max 2
 	turnover_root 0.7
-	ltor_max 0.9928877184866
+	ltor_max 0.981300572979305
 	k_allom1 100
 	k_allom2 18
 	k_allom3 1
