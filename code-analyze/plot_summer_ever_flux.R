@@ -215,11 +215,12 @@ ggsave("figures/GPP_LAI_origpheno.pdf", plot=both,
 # Re-do this plot in black and white for print
 ################################################################################
 printsafe <- c('#a6cee3','#1f78b4','#b2df8a','black')
-gpp3 <- gpp2 + scale_color_manual(values=printsafe)
+printsafe2 <- c('#1b9e77', '#d95f02', '#7570b3', 'black')
+gpp3 <- gpp2 + scale_color_manual(values=printsafe2)
 lai3 <- lai2 + scale_color_manual(name="Source",
                 breaks=c("Evergreen","Raingreen","Summergreen","MODIS"),
                 labels=c("Evergreen","Raingreen","Summergreen","Reference Data"),
-                values=printsafe)
+                values=printsafe2)
 
 # first, fix annoying issue with axes not lining up
 gp1<- ggplot_gtable(ggplot_build(gpp3))
