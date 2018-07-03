@@ -51,7 +51,7 @@ field <- read.csv("FieldLaiCover.csv")
 # Depends on tidyr and data.table packages
 
 # First, read ins into memory:
-ins  <- readLines("summergreen_optim1_LMpar.ins") # only outputs GPP and LAI
+ins  <- readLines("optim1_summergreen.ins") # only outputs GPP and LAI
 
 # NOTE: to run in paralle might need to wrap in foreach
 # Otherwise would over-write the temp ins file (I think)
