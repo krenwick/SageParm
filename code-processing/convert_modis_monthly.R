@@ -1,5 +1,6 @@
 #############################################################################
 # Pull in MODIS spreadheets and figure out how they work
+# COnvert units and time step so matches LPJ-GUESS
 #############################################################################
 rm(list=ls())
 library(tidyverse); theme_set(theme_bw(base_size=20)) # sized for ppt
