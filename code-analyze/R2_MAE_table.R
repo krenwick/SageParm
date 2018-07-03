@@ -1,5 +1,5 @@
 ################################################################################
-# Calculate R2 and MAE and put in table
+# Calculate R2 and MAE and put in table (Table 2 in manuscript)
 ################################################################################
 rm(list=ls()) 
 library(tidyverse); theme_set(theme_bw(base_size=18))

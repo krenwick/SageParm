@@ -3,6 +3,7 @@
 # 1. Read in data from LHC model runs
 # 2. Extract years 1986-2015, calculate averages, and select needed variables
 # 3. Calculate Ranked Partial Correlation Coefficients
+# Creates two exploratory tables not used in manuscript
 ################################################################################
 library(tidyverse)
 library(data.table) # for fread function (fast for big data)
@@ -270,7 +271,7 @@ RPCCgrass <- function(data,site){
   
   # For annual (sagebrush) data:
   if(ncol(b)<=9){
-    b=b[,1:7] # deal with 9th column in FPC due to fucked up merge
+    b=b[,1:7] # deal with 9th column in FPC due to messed up merge
     names(b)[7] <- "file"
   }
   

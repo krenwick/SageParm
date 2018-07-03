@@ -1,5 +1,6 @@
 ################################################################################
-# Plots for 2017 ESA talk
+# Makes table showing percent shrub LAI for each model run (Table 4)
+# Includes a bunch of other stuff I was playing with
 ################################################################################
 rm(list=ls()) 
 library(tidyverse); theme_set(theme_bw(base_size=18))
@@ -270,8 +271,6 @@ print(t,
       type="latex",
       booktabs=T,
       file="figures/perclai.tex")
-
-
 
 
 Site <- c("wbs","mbs","wbs","mbs","wbs","mbs","wbs","mbs")
