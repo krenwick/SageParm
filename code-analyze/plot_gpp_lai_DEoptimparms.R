@@ -13,10 +13,12 @@ library(gridExtra)
 
 # SET WORKING DIRECTORY:
 setwd("~/Documents/SageParm/")
-outname1 <- "ml_Mod1_newcostmean1000_disturb"
-outname2 <- "ml_NewPhen_newcostmean1000_disturb"
-object1 <- "HyaliteOutput/DE1parimage_mgl_Mod1_newcostmean1000.RData"
-object2 <- "HyaliteOutput/NewPhenImage_ml_newcostmean1000.RData"
+#outname1 <- "ml_Mod1_newcostmean1000_disturb"
+#outname2 <- "ml_NewPhen_newcostmean1000_disturb"
+outname1 <- "mgl_disturb_summergrass1"
+outname2 <- "mgl_disturb_summergrass2"
+#object1 <- "HyaliteOutput/DE1parimage_mgl_Mod1_newcostmean1000.RData"
+#object2 <- "HyaliteOutput/NewPhenImage_ml_newcostmean1000.RData"
 
 #-------------------------------------------------------------------------------
 # Journal Specifications for figure size
@@ -496,5 +498,20 @@ ggplot(data=GPPall2, aes(x=Tower, y=Model)) +
   geom_abline(intercept=0, slope=1) +
   facet_wrap(~Site)
 
-#####################################
+################################################################################
+# Look at annual values
+################################################################################
+# Look at LAI- annual
+a1 <- fread(paste("Output_localruns/lai_",insname,".txt",sep=""), header=T) %>%
+  mutate(Source="Model")
+a2 <- fread(paste("Output_localruns/lai_",insname2,".txt",sep=""), header=T) %>%
+  mutate(Source="Model2")
+a3 <- rbind.data.frame(a1,a2) %>%
+  dplyr::mutate(Year=Year+860) %>% 
+  filter(Year>=2015) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7486, "mbsec", "FIX")) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7356, "losec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7132, "wbsec", Site)) %>%
+  dplyr::mutate(Site=ifelse(Lon==-116.7231, "h08ec", Site)) 
+head(a3)
 

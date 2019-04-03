@@ -467,3 +467,20 @@ bothxy <- grid.arrange(arrangeGrob(gp2,gp1, ncol=1,heights = unit(c(61,59), "mm"
 ggsave("figures/GPP_LAI_newmods_xy.pdf", plot=bothxy,
        width = col2, height = 120, units = 'mm')
 
+################################################################################
+# Look at total GPP as instructed by reviewer 3
+################################################################################
+GPPan <- GPP %>%
+  mutate(WY=ifelse((Date>="2014-10-01"&Date<="2015-09-01"),2015,NA)) %>%
+  mutate(WY=ifelse((Date>="2015-10-01"&Date<="2016-09-01"),2016,WY)) %>%
+  group_by(Site,Source,WY) %>%
+  summarize(AnnualGPP=round(sum(GPP),2))
+GPPan2 <- GPPan %>% filter(WY==2015) %>% 
+  spread(Site, AnnualGPP)
+
+GPPan3 <- GPPan %>% group_by(Site,Source) %>%
+  summarize(MAgpp=mean(AnnualGPP)) %>%
+  spread(Site, MAgpp)
+
+GPPan4 <- GPPan %>% spread(Source, AnnualGPP) %>%
+  mutate_at(funs(diff=.-Tower), .vars=vars(Summergreen, Model,Model2))
