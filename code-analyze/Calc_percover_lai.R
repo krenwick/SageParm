@@ -272,6 +272,7 @@ print(t,
       booktabs=T,
       file="figures/perclai.tex")
 
+################################################################################
 
 Site <- c("wbs","mbs","wbs","mbs","wbs","mbs","wbs","mbs")
 Shrub <- c(40,62,1,90,1,92,20,65)
