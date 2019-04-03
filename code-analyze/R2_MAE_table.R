@@ -213,8 +213,8 @@ Value <- g1 %>% select(Date,Site,Tower:LAI2) %>%
   mutate_at(vars(Summergreen:LAI2), funs(.-Tower)) %>%
   na.omit() %>%
   mutate_at(vars(Summergreen:LAI2), funs(abs(.))) %>%
-  group_by(Site) %>%
-  summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
+  #group_by(Site) %>%
+  #summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
   ungroup() %>%
   summarise_at(vars(Summergreen:LAI2), funs(mean(.))) %>%
   select(-Evergreen, -Raingreen)
@@ -222,6 +222,20 @@ Value
 Value <- as.numeric(Value)
 stats2 <- cbind.data.frame(Model,Value) %>%
   mutate(Metric="MAE", Variable="GPP")
+
+# examine MAE by site
+# VbysiteGPP <- g1 %>% select(Date,Site,Tower:LAI2) %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(.-Tower)) %>%
+#   na.omit() %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(abs(.))) %>%
+#   group_by(Site) %>%
+#   summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
+#   #ungroup() %>%
+#   #summarise_at(vars(Summergreen:LAI2), funs(mean(.))) %>%
+#   select(-Evergreen, -Raingreen) %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(round(.,3)))
+
+
 
 # LAI------------------------------------------
 l1 <- LAIall %>%
@@ -248,14 +262,26 @@ Value <- l1 %>% select(Date,Site,MODIS:LAI2) %>%
   mutate_at(vars(Summergreen:LAI2), funs(.-MODIS)) %>%
   na.omit() %>%
   mutate_at(vars(Summergreen:LAI2), funs(abs(.))) %>%
-  group_by(Site) %>%
-  summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
+  #group_by(Site) %>%
+  #summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
   ungroup() %>%
   summarise_at(vars(Summergreen:LAI2), funs(mean(.))) %>%
   select(-Raingreen,-Evergreen)
 Value <- as.numeric(Value)
 stats4 <- cbind.data.frame(Model,Value) %>%
   mutate(Metric="MAE",Variable="LAI")
+
+# ***NOTE: Commented out so can't overwrite manual changes in tex file
+# Get MAE by site
+# LAIMEAbysite <- l1 %>% select(Date,Site,MODIS:LAI2) %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(.-MODIS)) %>%
+#   na.omit() %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(abs(.))) %>%
+#   group_by(Site) %>%
+#   summarise_at(vars(Summergreen:LAI2), funs(sum(.))) %>%
+#   select(-Raingreen,-Evergreen) %>%
+#   mutate_at(vars(Summergreen:LAI2), funs(round(.,2)))
+
 
 ################################################################################
 # Combine GPP and LAI stats and format as pretty table
@@ -264,7 +290,7 @@ R2 <- rbind.data.frame(stats1,stats3) %>%
   mutate_if(is.numeric, funs(round(.,2))) %>%
   spread(Variable,Value) %>% select(-Metric) 
 MAE <- rbind.data.frame(stats2,stats4) %>%
-  mutate_if(is.numeric, funs(round(.,2))) %>%
+  mutate_if(is.numeric, funs(round(.,3))) %>%
   spread(Variable,Value) %>% select(-Metric) %>%
   rename(GPP2=GPP, LAI2=LAI)
 
@@ -291,9 +317,12 @@ both2 <- merge(R2,MAE, by="Model") %>%
  mutate(Model=factor(Model, levels=c("Original","NewParm","NewPhen","Mod1GPP",
                                       "Mod2GPP","Mod1LAI","Mod2LAI"), ordered=T,
 labels=c("Original","Optimal Parameters","New Phenology",
-         "Optimal Parameters","New Phenology",
-         "Optimal Parameters","New Phenology"))) %>%
+         "Optimal Parameters2","New Phenology2",
+         "Optimal Parameters3","New Phenology3"))) %>%
   arrange(Model)
+# **NOTE: not sure what changed, but in 2019 wasn't sorting correctly***********
+# **MUST go in to LaTex file and delete numbers in variable names
+# **Must also add trailing zeros to some numbers
 
 optim <- c(NA,"GPP and LAI",NA,"Just GPP",NA,"Just LAI",NA)
 b3 <- cbind(optim,both2) %>%
@@ -308,14 +337,14 @@ b3[1,2:6] <- paste0("BOLD", b3[1,2:6])
 bold.somerows <- 
   function(x) gsub('BOLD(.*)',paste('\\\\textbf{\\1}'),x)
 t2 <- xtable(b3)
-# print(t2,
-#       only.contents=TRUE,
-#       include.rownames=FALSE,
-#       type="latex",
-#       booktabs=T,
-#       hline.after=c(0,1,3,5),
-#       sanitize.text.function = bold.somerows,
-#       file="figures/R2MAE2.tex")
+print(t2,
+      only.contents=TRUE,
+      include.rownames=FALSE,
+      type="latex",
+      booktabs=T,
+      hline.after=c(0,1,3,5),
+      sanitize.text.function = bold.somerows,
+      file="figures/LatexTables/R2MAE2.tex")
 
 ################################################################################
 # Make some plots to see if hit peak
