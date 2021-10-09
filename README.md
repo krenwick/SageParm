@@ -1,4 +1,4 @@
-This repository contains code associated with the manuscript titled "Modeling phenological controls on carbon dynamics in dryland sagebrush ecosystems", which is currently in review.
+This repository contains code associated with the publication titled "Modeling phenological controls on carbon dynamics in dryland sagebrush ecosystems", published in the Journal of Agricultural and Forest Meteorology. The paper is available at https://doi.org/10.1016/j.agrformet.2019.04.003
 
 Notes:
 
